@@ -176,7 +176,7 @@ callout_arg returns [ASCalloutArg arg]
         }
         : e=expr {arg=e;} | s:STRING {arg = new ASStringLiteral(s.getText());};
 
-//handle precedance and  done
+//handle precedence and  done
 terms returns [ASExpr expr]
     {
         expr = null;
@@ -256,7 +256,7 @@ pexpr returns [ASExpr expr]
             }    
             ;
 
-//done - important debug (made left associative) additionally had to consider precedance
+//done - important debug (made left associative) additionally had to consider precedence
 mexpr returns [ASExpr expr]
             {
                 expr = null;
