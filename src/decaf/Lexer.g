@@ -6,6 +6,8 @@ options
   language="Java";
 }
 
+
+
 class DecafScanner extends Lexer;
 options 
 {
@@ -30,63 +32,60 @@ tokens
   "Program"; 
 }
 
-LCURLY : "{";
-RCURLY : "}";
+LCURLY : '{';
+RCURLY : '}';
 
-LPARA : "(" ;
-RPARA : ")" ;
+LPARA : '(' ;
+RPARA : ')' ;
 
-LBRAC : "[";
-RBRAC : "]";
+LBRAC : '[';
+RBRAC : ']';
 
-SEMI : ";";
-COMMA : ","; //for certain commands
+SEMI : ';';
+COMMA : ','; //for certain commands
 
 //arithmetic
-ADDOP : PLUS | MINUS;
-MULOP : MULT | DIV;
-RSHIFT : ">>";
-LSHIFT : "<<";
+PLUS : '+';
+MINUS : '-';
+MULT : '*';
+DIV : '/';
+MOD : '%';
 
-//comparisons
-COMP_EQ : NEQ | EQUAL | GE | LE ;
-COMP : GT | LT;
+
+//comparison
+EQUAL : '=' '=';
+NEQ : '!' '=';
+GE : '>' '=';
+LE : '<' '=';
+GT : '>';
+LT : '<';
 
 //assigning
 ASSIGN : '=';
-INC_ASSIGN : ('+' | '-')('='); 
+INC_ASSIGN : "+=";
+DEC_ASSIGN : "-="; 
 
 //logical operations
-LOGICAL : "&&" | "||";
-UNARY : '&' | '|' | '!';
+LOGICAL_AND : "&&";
+LOGICAL_OR  : "||";
+UNARY_AND   : '&';
+UNARY_OR    : '|'; 
+UNARY_NOT   : '!';
 
-ID options { paraphrase = "an identifier"; } : 
-  ('_'|'a'..'z'|'A'..'Z')('_'|'a'..'z'|'A'..'Z'|'0'..'9')*;
+ID  : ('_'|'a'..'z'|'A'..'Z')('_'|'a'..'z'|'A'..'Z'|'0'..'9')* ;
 
-WS_ : ('\r' | '\t' | ' ' | '\n' {newline();}) {_ttype = Token.SKIP; };
+WS_ : ('\r' | '\t' | ' ' | '\n' {newline();} ) {_ttype = Token.SKIP;};
 
-SL_COMMENT : "//" (~'\n')* '\n' {_ttype = Token.SKIP; newline (); };
+SL_COMMENT : "//" (~'\n')* '\n' {_ttype = Token.SKIP; newline();};
 
 CHAR : '\'' (ESC|VALID) '\'';
 STRING : '"' (ESC|VALID)* '"';
-INT : HEXA | DEC;
+INT_VAL : HEXA | DEC;
 
 
 protected ESC :  '\\' ('n'|'"'|'\''|'t'|'\\');
 protected VALID : ('\u0020'..'\u0021' | '\u0023'..'\u0026' | '\u0028'..'\u005B' | '\u005D'..'\u007E');
 protected HEXA : "0x" ('0'..'9' | 'a' .. 'f' | 'A' .. 'F')+;
 protected DEC : ('0'..'9')+;
-
-protected EQUAL : '=' '=';
-protected NEQ : '!' '=';
-protected GE : '>' '=';
-protected LE : '<' '=';
-protected GT : '>';
-protected LT : '<';
-
-protected PLUS : '+';
-protected MINUS : '-';
-protected MULT : '*';
-protected DIV : '/';
 
 

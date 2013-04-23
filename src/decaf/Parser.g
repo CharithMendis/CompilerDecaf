@@ -108,9 +108,8 @@ var_decl [ASBlock b] : var[null,b] SEMI! ;
 block returns [ASBlock b]
     {
         b = new ASBlock();
-        ASBlock n=null;
     }
-    : LCURLY (var_decl[b])* (statement[b]|n=block {b.addBlock(n);})* RCURLY;
+    : LCURLY (var_decl[b])* (statement[b])* RCURLY ;
 
 //done
 statement [ASBlock b]
@@ -132,16 +131,18 @@ statement [ASBlock b]
             ASBlock forb;
             //return
             ASExpr retex=null;
+            //block
+            ASBlock bb;
           }
           : 
-          loc=location op=assign_op ex=expr SEMI! {stat = new ASAssignment(op,loc,ex);}
-          | m=method_call SEMI! {stat = new ASMethodCallS(m);}
-          | TK_if LPARA ifex=expr RPARA ifb=block (TK_else elseb=block)? {stat = new ASIf(ifex,ifb,elseb);}
-          | TK_for v:ID ASSIGN start=expr COMMA end=expr forb=block {stat = new ASFor(v.getText(),start,end,forb); } 
-          | TK_return (retex=expr)? SEMI! {stat = new ASReturn(retex);}
-          | TK_break SEMI! {stat = new ASBreak();}
-          | TK_continue SEMI! {stat = new ASContinue();}
-          {b.addStatement(stat);}
+          loc=location op=assign_op ex=expr SEMI! {stat = new ASAssignment(op,loc,ex); b.addStatement(stat);}
+          | m=method_call SEMI! {stat = new ASMethodCallS(m); b.addStatement(stat);}
+          | TK_if LPARA ifex=expr RPARA ifb=block (TK_else elseb=block)? {stat = new ASIf(ifex,ifb,elseb); b.addStatement(stat);}
+          | TK_for v:ID ASSIGN start=expr COMMA end=expr forb=block {stat = new ASFor(v.getText(),start,end,forb); b.addStatement(stat); } 
+          | TK_return (retex=expr)? SEMI! {stat = new ASReturn(retex); b.addStatement(stat);}
+          | TK_break SEMI! {stat = new ASBreak(); b.addStatement(stat);}
+          | TK_continue SEMI! {stat = new ASContinue(); b.addStatement(stat);}
+          | bb=block {stat=bb; b.addStatement(stat);}          
           ;
           
 //done
@@ -264,26 +265,26 @@ mexpr returns [ASExpr expr]
             : l=mmexpr (MINUS r=mexpr)? 
             {
                 if(r!=null){ //middle of the expr
-                        if(r.getClass() == ASBinaryExpr.class && !r.isParan){
-                            //we can rearrange the tree now
-                            
-                            ASBinaryExpr rtemp = ((ASBinaryExpr)r);
-                            //need to check for precedance among 
-                            if( rtemp.operator == ASBinaryExpr.MOD 
-                                || rtemp.operator == ASBinaryExpr.MULT 
-                                || rtemp.operator == ASBinaryExpr.DIV ) {   //then keep the current tree
-                                    expr = new ASBinaryExpr("-",l,r);
-                            }
-                            else{   //change the tree to left associativity
-                                ASExpr newRhs = rtemp.lhs;
-                                ASBinaryExpr newEx = new ASBinaryExpr("-",l,newRhs);
-                                expr = new ASBinaryExpr(rtemp.stringop,newEx,rtemp.rhs);
-                            }
-                            
+
+                        ASExpr rtemp = r;
+                        ASExpr prev = null;
+                        while(rtemp.getClass()==ASBinaryExpr.class && !rtemp.isParan
+                                && ((ASBinaryExpr)rtemp).operator != ASBinaryExpr.MOD 
+                                && ((ASBinaryExpr)rtemp).operator != ASBinaryExpr.MULT 
+                                && ((ASBinaryExpr)rtemp).operator != ASBinaryExpr.DIV){
+                            prev = rtemp;
+                            rtemp = ((ASBinaryExpr)rtemp).lhs;
+                        }
+
+                        ASBinaryExpr newNode = new ASBinaryExpr("-",l,rtemp);
+                        if(prev != null){
+                            ((ASBinaryExpr)prev).lhs = newNode;
+                            expr = r;
                         }
                         else{
-                            expr = new ASBinaryExpr("-",l,r);
+                            expr = new ASBinaryExpr("-",l,r); 
                         }
+                        
                     }
                     else{   //when the last token is read
                         expr = l;
@@ -315,17 +316,23 @@ dexpr returns [ASExpr expr]
             : l=unot (DIV r=dexpr)? 
               {
                     if(r!=null){ //middle of the expr
-                        if(r.getClass() == ASBinaryExpr.class && !r.isParan){
-                            //we can rearrange the tree now
-                            //need to check for precedance ; as this is the highest among binary no need here
-                            ASBinaryExpr rtemp = ((ASBinaryExpr)r);
-                            ASExpr newRhs = rtemp.lhs;
-                            ASBinaryExpr newEx = new ASBinaryExpr("/",l,newRhs);
-                            expr = new ASBinaryExpr(rtemp.stringop,newEx,rtemp.rhs);
+                        
+                        ASExpr rtemp = r;
+                        ASExpr prev = null;
+                        while(rtemp.getClass()==ASBinaryExpr.class && !rtemp.isParan){
+                            prev = rtemp;
+                            rtemp = ((ASBinaryExpr)rtemp).lhs;
+                        }
+
+                        ASBinaryExpr newNode = new ASBinaryExpr("/",l,rtemp);
+                        if(prev != null){
+                            ((ASBinaryExpr)prev).lhs = newNode;
+                            expr = r;
                         }
                         else{
-                            expr = new ASBinaryExpr("/",l,r);
+                            expr = new ASBinaryExpr("/",l,r); 
                         }
+
                     }
                     else{   //when the last token is read
                         expr = l;
@@ -402,9 +409,10 @@ protected method_name returns [String id]
 protected location returns [ASLocation loc]
                   {
                         loc = null;
+                        ASExpr ex;
                   }
                   :i:ID {loc = new ASLocationVar(i.getText());}
-                  |j:ID LBRAC expr RBRAC {loc = new ASLocationArray(j.getText(),null);};
+                  |j:ID LBRAC ex=expr RBRAC {loc = new ASLocationArray(j.getText(),ex);};
 
 
 
