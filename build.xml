@@ -45,6 +45,7 @@
     <mkdir dir="${java}"/>
     <mkdir dir="${dist}"/>
     <mkdir dir="${java}/decaf"/>
+    <mkdir dir="reports"/>
   </target>
 
   <!-- copy manual edited sources to automatically generated ones -->
@@ -54,7 +55,7 @@
    </copy>
   </target>
 
-  <target name="scanner" depends="init">
+  <target name="scanner" depends="copy_src">
     <antlr
       target="${src}/decaf/Lexer.g"
       outputdirectory="${java}/decaf"
@@ -69,7 +70,9 @@
     <!-- set trace="yes" if you want to trace the praser actions -->
     <antlr
       target="${src}/decaf/Parser.g"
-      outputdirectory="${java}/decaf">
+      outputdirectory="${java}/decaf"
+    >
+        
       <classpath>
         <pathelement location="${lib}/antlr.jar" />
       </classpath>
@@ -77,10 +80,33 @@
   </target>
 
   <target name="compile" depends="parser">
-    <javac srcdir="${java}:${src}" destdir="${classes}" debug="on">
-      <classpath refid="libraries"/>
+    <javac srcdir="${java}" destdir="${classes}" debug="on">
+      <classpath>
+          <path refid = "libraries"/>
+          <pathelement path = "${java}"/>
+    </classpath>
     </javac>
   </target>
+  
+  <target name = "junit-run" depends = "compile">
+      <junit printsummary = "on" showoutput = "no" fork="yes">
+          <test name = "test.testScanner"  outfile="result" todir = "reports">
+            
+            <formatter type="plain"/>
+          </test>
+          <classpath>
+              <path refid = "libraries"/>
+              <pathelement path = "${classes}"/>
+          </classpath>
+      </junit>     
+  </target>
+  
+  <target name="junitreport" depends="junit-run">
+        <junitreport todir="reports">
+        <fileset dir="reports"  includes="*.xml" />
+        <report format="frames" todir = "reports"/>
+        </junitreport>
+ </target>
 
   <target name="jar" depends="compile">
     <jar jarfile="${dist}/Compiler.jar" basedir="${classes}">
@@ -99,9 +125,11 @@
   <target name="run" depends="jar">
       <java jar="${dist}/Compiler.jar" fork="true">
           <arg value = "-target"/>
-          <arg value = "scan"/>
+          <arg value = "parser"/>
           <arg value = "-debug"/>
-          <arg value = "D:\MIT\Compiler\6-035-spring-2010\6-035-spring-2010\project\p1files\provided\scanner\string2" />
+          <arg value = "D:\MIT\Compiler\6-035-spring-2010\6-035-spring-2010\project\p1files\provided\parser\parse" />
+          <!-- arg value = "-alls"/-->
+         
       </java>
   </target>
   
