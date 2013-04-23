@@ -22,6 +22,19 @@ options
   defaultErrorHandler=false;
 }
 
+{
+    //common function
+    ASExpr getExpr(String op,ASExpr l,ASExpr r){
+        ASExpr expr;
+        if(r!=null){
+            expr = new ASBinaryExpr(op,l,r);
+        }
+        else{
+            expr = l;
+        }
+        return expr;
+    }
+}
 //done
 program returns [ASProgram p] 
                     {
@@ -29,68 +42,255 @@ program returns [ASProgram p]
                     }
                     : TK_class TK_Program LCURLY 
                      (field_decl[p])* (method_decl[p])* RCURLY;
+//done
+field_decl [ASProgram p]
+            {
+                ASType t;
+                int a1=0,a2=0;
+            }
+            : 
+            t=type (id1:ID {p.addFieldDecl(new ASVariable(t,id1.getText()));} | 
+                        (id2:ID LBRAC a1=int_literal RBRAC {p.addFieldDecl(new ASArray(t,id2.getText(),a1));}))
+                   (COMMA (id3:ID {p.addFieldDecl(new ASVariable(t,id3.getText()));} | 
+                        (id4:ID LBRAC a2=int_literal RBRAC{p.addFieldDecl(new ASArray(t,id4.getText(),a2));})))* SEMI!;
 
+protected int_literal returns [int y]
+        {
+            y = 0;
+        }
+        : i:INT_VAL
+        {
+            if(i.getText().startsWith("0x")){
+                y = Integer.parseInt(i.getText().substring(2),16);
+            }
+            else{
+                y = Integer.parseInt(i.getText());
+            }
+        };
 
-field_decl [ASProgram p]: type (ID | (ID LBRAC INT_VAL RBRAC))(COMMA (ID | (ID LBRAC INT_VAL RBRAC)))* SEMI!;
-method_decl [ASProgram p]: (type|TK_void) ID LPARA (var)* RPARA block;
+//done
+method_decl [ASProgram p] 
+            {
+                ASType t=null;
+                ASMethodDecl dec=null;
+                ASBlock b=null;
+            }
+            : (t=type|k:TK_void {t = new ASType(k.getText());}) 
+               n:ID {dec = new ASMethodDecl(t,n.getText());} LPARA (var[dec,null])? RPARA b=block
+               {
+                    dec.addBlock(b);
+                    p.addMethodDecl(dec);
+               }
+            ;
 
+//done
+protected var [ASMethodDecl d,ASBlock b] //variable decl or method decl
+            {
+                ASType t1,t2;
+            }
+            : (t1=type id1:ID {
+                        if(d!=null)
+                            d.addParameters(new ASVariable(t1,id1.getText()));
+                        else
+                            b.addVar(new ASVariable(t1,id1.getText()));
+               })
+              (COMMA t2=type id2:ID {
+                        if(d!=null)
+                            d.addParameters(new ASVariable(t2,id2.getText()));
+                        else
+                            b.addVar(new ASVariable(t2,id2.getText()));
+               })* ;
 
-var_decl : var SEMI! ;
+//done
+var_decl [ASBlock b] : var[null,b] SEMI! ;
 
-block : LCURLY (var_decl)* (statement)* RCURLY;
+//done
+block returns [ASBlock b]
+    {
+        b = new ASBlock();
+        ASBlock n=null;
+    }
+    : LCURLY (var_decl[b])* (statement[b]|n=block {b.addBlock(n);})* RCURLY;
 
-statement : location assign_op expr SEMI!
-          | method_call SEMI! 
-          | TK_if LPARA expr RPARA block (TK_else block)*
-          | TK_for ID ASSIGN expr COMMA expr block
-          | TK_return (expr)* SEMI!
-          | TK_break SEMI!
-          | TK_continue SEMI!
-          | block ;
+//done
+statement [ASBlock b]
+          {
+            ASStatement stat=null;
+            //assignement
+            ASLocation loc;
+            String op;
+            ASExpr ex;
+            //method call
+            ASMethodCall m;
+            //if
+            ASExpr ifex;
+            ASBlock ifb;
+            ASBlock elseb=null;
+            //for
+            ASExpr start;
+            ASExpr end;
+            ASBlock forb;
+            //return
+            ASExpr retex=null;
+          }
+          : 
+          loc=location op=assign_op ex=expr SEMI! {stat = new ASAssignment(op,loc,ex);}
+          | m=method_call SEMI! {stat = new ASMethodCallS(m);}
+          | TK_if LPARA ifex=expr RPARA ifb=block (TK_else elseb=block)? {stat = new ASIf(ifex,ifb,elseb);}
+          | TK_for v:ID ASSIGN start=expr COMMA end=expr forb=block {stat = new ASFor(v.getText(),start,end,forb); } 
+          | TK_return (retex=expr)? SEMI! {stat = new ASReturn(retex);}
+          | TK_break SEMI! {stat = new ASBreak();}
+          | TK_continue SEMI! {stat = new ASContinue();}
+          {b.addStatement(stat);}
+          ;
           
+//done
 method_call returns [ASMethodCall method]
             {
                 String m;
                 method = null;
+                ASExpr e;
+                ASCalloutArg arg;
             }
             : 
                 m=method_name 
                 {
                     method = new ASNormalCall(m); 
                 } 
-                LPARA ((expr {((ASNormalCall)method).addArgument(null);})(COMMA expr {((ASNormalCall)method).addArgument(null);})*)* RPARA  
+                LPARA ((e=expr {((ASNormalCall)method).addArgument(e);})(COMMA e=expr {((ASNormalCall)method).addArgument(e);})*)* RPARA  
                 
             |   
                 TK_callout LPARA n:STRING 
                 {
                     method = new ASLibraryCall(n.getText()); 
                 }
-                (COMMA (callout_arg {((ASLibraryCall)method).addArgument(null);} )(COMMA callout_arg {((ASLibraryCall)method).addArgument(null);} )*)? RPARA
+                (COMMA (arg=callout_arg {((ASLibraryCall)method).addArgument(arg);} )(COMMA arg=callout_arg {((ASLibraryCall)method).addArgument(arg);} )*)? RPARA
                 
             ;
+//done
+callout_arg returns [ASCalloutArg arg]
+        {
+            arg = null;
+            ASExpr e;
+        }
+        : e=expr {arg=e;} | s:STRING {arg = new ASStringLiteral(s.getText());};
 
-//handle precedance
+//handle precedance and  done
 terms returns [ASExpr expr]
     {
         expr = null;
     }
     : expr = pre_method_location 
     | expr = literal 
-    | (LPARA expr RPARA) {expr = null;} 
+    | (LPARA expr = expr RPARA) {expr.isParan=true;} 
     ;
 
-expr : andexpr ((LOGICAL_OR) expr)?;
+//done
+pre_method_location returns [ASExpr expr]
+             {
+                expr=null;
+                ASMethodCall r;
+             }
+             : (method_name LPARA) => r=method_call {expr = new ASMethodCallE(r);}
+             | expr=location ;
 
-andexpr : eqexpr ((LOGICAL_AND) andexpr)?;
+//done
+expr returns [ASExpr expr]
+            {
+                expr = null;
+                ASExpr l=null,r=null;
+            }
+            : l=andexpr ((LOGICAL_OR) r=expr)?
+            {
+                 expr = getExpr("||",l,r);
+            }
+            ;
 
-eqexpr : relexpr ((EQUAL|NEQ) eqexpr)?;
+//done
+andexpr returns [ASExpr expr]
+            {
+                expr = null;
+                ASExpr l=null,r=null;
+            }
+            : l=eqexpr ((LOGICAL_AND) r=andexpr)?
+            {
+                expr = getExpr("&&",l,r);
+            }
+            ;
+//done
+eqexpr returns [ASExpr expr]
+            {
+                expr = null;
+                ASExpr l=null,r=null;
+                String op="";
+            }
+            : l=relexpr ((EQUAL{op="==";}|NEQ{op="!=";}) r=eqexpr)?
+            {
+                expr = getExpr(op,l,r);
+            }
+            ;
 
-relexpr : pexpr ((GE|GT|LE|LT) relexpr)?;
+//done
+relexpr returns [ASExpr expr]
+            {
+                expr = null;
+                ASExpr l=null,r=null;
+                String op="";
+            }
+            : l=pexpr ((GE{op=">=";}|GT{op=">";}|LE{op="<=";}|LT{op="<";}) r=relexpr)?
+            {
+                expr = getExpr(op,l,r);
+            }
+            ;
 
-pexpr : mexpr (PLUS pexpr)? ;
+//done
+pexpr returns [ASExpr expr]
+            {
+                expr = null;
+                ASExpr l=null,r=null;
+            }
+            : l=mexpr (PLUS r=pexpr)? 
+            {
+                expr = getExpr("+",l,r);
+            }    
+            ;
 
 //done - important debug (made left associative) additionally had to consider precedance
-mexpr : mmexpr (MINUS mexpr)? ;
+mexpr returns [ASExpr expr]
+            {
+                expr = null;
+                ASExpr l=null,r=null;
+            }
+            : l=mmexpr (MINUS r=mexpr)? 
+            {
+                if(r!=null){ //middle of the expr
+                        if(r.getClass() == ASBinaryExpr.class && !r.isParan){
+                            //we can rearrange the tree now
+                            
+                            ASBinaryExpr rtemp = ((ASBinaryExpr)r);
+                            //need to check for precedance among 
+                            if( rtemp.operator == ASBinaryExpr.MOD 
+                                || rtemp.operator == ASBinaryExpr.MULT 
+                                || rtemp.operator == ASBinaryExpr.DIV ) {   //then keep the current tree
+                                    expr = new ASBinaryExpr("-",l,r);
+                            }
+                            else{   //change the tree to left associativity
+                                ASExpr newRhs = rtemp.lhs;
+                                ASBinaryExpr newEx = new ASBinaryExpr("-",l,newRhs);
+                                expr = new ASBinaryExpr(rtemp.stringop,newEx,rtemp.rhs);
+                            }
+                            
+                        }
+                        else{
+                            expr = new ASBinaryExpr("-",l,r);
+                        }
+                    }
+                    else{   //when the last token is read
+                        expr = l;
+                    }
+                    //System.out.println(expr);
+            }
+            ;
 
 
 //done - right associative - no need to change
@@ -102,12 +302,7 @@ mmexpr returns [ASExpr expr]
             }
             : l=dexpr ((MULT {op="*";}|MOD {op="%";}) r=mmexpr)?
                 {
-                    if(r!=null){ //middle of the expr
-                        expr = new ASBinaryExpr(op,l,r);
-                    }
-                    else{
-                        expr = l;
-                    }
+                    expr = getExpr(op,l,r);
                 }
             ;
 
@@ -119,8 +314,6 @@ dexpr returns [ASExpr expr]
             }
             : l=unot (DIV r=dexpr)? 
               {
-                    //System.out.println(l);
-                    //System.out.println(r);
                     if(r!=null){ //middle of the expr
                         if(r.getClass() == ASBinaryExpr.class && !r.isParan){
                             //we can rearrange the tree now
@@ -130,7 +323,7 @@ dexpr returns [ASExpr expr]
                             ASBinaryExpr newEx = new ASBinaryExpr("/",l,newRhs);
                             expr = new ASBinaryExpr(rtemp.stringop,newEx,rtemp.rhs);
                         }
-                        else if(r instanceof ASLiteral){
+                        else{
                             expr = new ASBinaryExpr("/",l,r);
                         }
                     }
@@ -158,15 +351,9 @@ uminus returns [ASExpr expr]
             MINUS r=uminus {expr = new ASUnaryExpr("-",r);}| r=terms {expr = r;};
 
 
-pre_method_location returns [ASExpr expr]
-             {
-                expr=null;
-                ASMethodCall r;
-             }
-             : (method_name LPARA) => r=method_call {expr = new ASMethodCallE(r);}
-             | expr=location ;
 
-callout_arg : expr | STRING;
+
+
 
 //protected bin_op : arith_op | rel_op | eq_op | cond_op;
 //protected arith_op  : PLUS | MINUS | MULT | DIV | MOD ;
@@ -174,16 +361,18 @@ callout_arg : expr | STRING;
 //protected eq_op : EQUAL | NEQ;
 //protected cond_op : LOGICAL_AND | LOGICAL_OR ;
 
+//done
 protected literal returns [ASLiteral l]
         {   
             l= null;
+            int i=0;
         }
-        : i:INT_VAL {l = new ASIntLiteral(i.getText());}
+        : i=int_literal {l = new ASIntLiteral(i);}
         | j:CHAR    {l = new ASCharLiteral(j.getText().toCharArray()[0]);}
         | k:TK_true {l = new ASBooleanLiteral(k.getText().equals("true"));} 
         | m:TK_false{l = new ASBooleanLiteral(m.getText().equals("false"));} ;
 
-
+//done
 protected type returns [ASType t]
             {
                 t=null;
@@ -191,8 +380,16 @@ protected type returns [ASType t]
             : ( TK_int {t=new ASType("int");} | TK_boolean {t=new ASType("boolean");});
 
 
-protected var : (type ID)(COMMA type ID)* ;
-protected assign_op : ASSIGN | INC_ASSIGN | DEC_ASSIGN ;
+
+
+//done
+protected assign_op returns [String s]
+            {
+                s="";
+            }
+            : i:ASSIGN {s=i.getText();} 
+            | j:INC_ASSIGN {s=j.getText();}
+            | k:DEC_ASSIGN {s=k.getText();};
 
 //string of the method name
 protected method_name returns [String id] 
@@ -209,28 +406,6 @@ protected location returns [ASLocation loc]
                   :i:ID {loc = new ASLocationVar(i.getText());}
                   |j:ID LBRAC expr RBRAC {loc = new ASLocationArray(j.getText(),null);};
 
-//mpexpr : mdmexpr s1 ;
 
-//s1 : (PLUS|MINUS) mpexpr s1 | ;
-
-//mdmexpr :  unot s2 ;
-
-//s2 : (MULT|DIV|MOD) mdmexpr s2 | ;
-
-
-/*
-class CalcTreeWalker extends TreeParser;
-
-expr returns [float r]
-{
-    float a,b;
-    r=0;
-}
-    :   #(PLUS a=expr b=expr)   {r = a+b;}
-    |   #(STAR a=expr b=expr)   {r = a*b;}
-    |   i:INT
-        {r = (float)
-         Integer.parseInt(i.getText());}
-    ;*/
 
 
