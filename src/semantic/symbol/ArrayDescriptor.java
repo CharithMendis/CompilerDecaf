@@ -16,10 +16,12 @@ public class ArrayDescriptor extends Descriptor{
     public String name;
     public int size;
 
-    public ArrayDescriptor(ASType type, String name,int size) {
+    public ArrayDescriptor(ASType type, String name,int size,int line,int col) {
         this.type = type;
         this.name = name;
         this.size = size;
+        this.column = col;
+        this.line = line;
     }
     
     @Override

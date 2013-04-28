@@ -76,7 +76,11 @@ class Main {
         		DecafParser parser = new DecafParser (lexer);
                         ASProgram p = parser.program();
                         p.accept(new DebugVisitor(),0);
-                        SemanticVisitor v = new SemanticVisitor();
+                        
+                        String name = CLI.infile;
+                        File f = new File(name);
+                        
+                        SemanticVisitor v = new SemanticVisitor(f.getName());
                         p.acceptWithReturn(v);
                         SymbolTablePrinter print = new SymbolTablePrinter(v.top);
                         print.print();

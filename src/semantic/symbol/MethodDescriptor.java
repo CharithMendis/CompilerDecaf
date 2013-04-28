@@ -19,12 +19,16 @@ public class MethodDescriptor extends Descriptor{
     public String name;
     public ArrayList<VariableDescriptor> parameters;
     public Environment env;   //has an environment
+    
+    
 
-    public MethodDescriptor(ASType returnValue, String name,Environment current) {
+    public MethodDescriptor(ASType returnValue, String name,Environment current, int line,int col) {
         this.returnValue = returnValue;
         this.name = name;
         parameters = new ArrayList();
         env = new Environment(current);
+        this.line = line;
+        this.column = col;
         
         
     }

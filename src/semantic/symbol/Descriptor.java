@@ -12,4 +12,7 @@ public abstract class Descriptor {
     
     abstract public void print();
     
+    public int line;
+    public int column;
+    
 }
