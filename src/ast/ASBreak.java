@@ -12,6 +12,19 @@ import semantic.VisitorWithReturn;
  * @author Charith
  */
 public class ASBreak extends ASStatement{
+
+    public ASBreak() {
+    }
+
+    
+    
+    public ASBreak(int line,int col) {
+        this();
+        this.line = line;
+        this.column = col;
+    }
+    
+    
     
     public void accept(Visitor v, int t) {
         v.visit(this,t);

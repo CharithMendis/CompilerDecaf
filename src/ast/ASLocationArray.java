@@ -19,6 +19,12 @@ public class ASLocationArray extends ASLocation{
         this.location = location;
     }
     
+    public ASLocationArray(String name,ASExpr location, int line, int col){
+        this(name, location);
+        this.line = line;
+        this.column = col;
+    }
+    
     public void accept(Visitor v, int t) {
         v.visit(this,t);
         ASUtilities.visit(location, t, v);

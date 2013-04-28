@@ -19,6 +19,13 @@ public class ASMethodCallS extends ASStatement{
         this.method = method;
     }
     
+    
+    public ASMethodCallS(ASMethodCall method, int line, int col){
+         this(method);
+         this.line = line;
+         this.column = col;
+     }
+    
     public void accept(Visitor v, int t) {
         v.visit(this,t);
         ASUtilities.visit(method, t, v);

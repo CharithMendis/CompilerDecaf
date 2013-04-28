@@ -20,6 +20,13 @@ public class ASIntLiteral extends ASLiteral{
         
     }
     
+    public ASIntLiteral(int integer, int line, int col){
+       this(integer);
+       this.line = line;
+       this.column = col;
+    }
+    
+    
     public void accept(Visitor v, int t) {
         v.visit(this,t);
     }

@@ -25,6 +25,12 @@ public class ASMethodDecl extends AS{
         parameters = new ArrayList<ASVariable>();
     }
     
+    public ASMethodDecl(ASType type, String name,int line,int col){
+        this(type,name);
+        this.line = line;
+        this.column = col;
+    }
+    
     public void addParameters(ASVariable var){
         parameters.add(var);
     }

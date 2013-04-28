@@ -22,6 +22,12 @@ public class ASBlock extends ASStatement{
         statements = new ArrayList();
         
     }
+    
+    public ASBlock(int line, int col){
+        this();
+        this.line = line;
+        this.column = col;
+    }
 
     public void addVar(ASVariable v){
         var.add(v);

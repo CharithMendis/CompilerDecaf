@@ -18,6 +18,12 @@ public class ASCharLiteral extends ASLiteral{
     public ASCharLiteral(char character) {
         this.character = character;
     }
+    
+    public ASCharLiteral(char character,int line, int col){
+        this(character);
+        this.line = line;
+        this.column = col;
+    }
 
     public void accept(Visitor v, int t) {
         v.visit(this,t);

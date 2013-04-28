@@ -21,6 +21,12 @@ public class ASLibraryCall extends ASMethodCall{
         this.name = name;
     }
     
+    public ASLibraryCall(String name, int line, int col){
+        this(name);
+        this.line = line;
+        this.column = col;
+    }
+    
     public void addArgument(ASCalloutArg arg){
         arguments.add(arg);
     }

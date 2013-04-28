@@ -31,6 +31,12 @@ public class ASIf extends ASStatement{
             elsePresent = true;
     }
     
+    public ASIf(ASExpr condition, ASBlock ifstat, ASBlock elsestat, int line, int col){
+        this(condition, ifstat, elsestat);
+        this.line = line;
+        this.column = col;
+    }
+    
     public void accept(Visitor v, int t) {
         v.visit(this,t);
         ASUtilities.visit(condition, t, v);

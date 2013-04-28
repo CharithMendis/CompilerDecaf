@@ -22,6 +22,12 @@ public class ASProgram extends AS{
         fields = new ArrayList<ASFieldDecl>();
     }
     
+    public ASProgram(int line, int col){
+        this();
+        this.line = line;
+        this.column = col;
+    }
+    
     public void addMethodDecl(ASMethodDecl method){
         methods.add(method);
     }

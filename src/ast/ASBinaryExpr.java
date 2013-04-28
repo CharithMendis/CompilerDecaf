@@ -79,6 +79,12 @@ public class ASBinaryExpr extends ASExpr{
         }
     }
     
+    public ASBinaryExpr(String op, ASExpr lhs, ASExpr rhs, int line, int col){
+        this(op,lhs,rhs);
+        this.line = line;
+        this.column = col;
+    }
+    
     public void accept(Visitor v, int t) {
         v.visit(this,t);
         

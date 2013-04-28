@@ -12,6 +12,17 @@ import semantic.VisitorWithReturn;
  * @author Charith
  */
 public class ASContinue extends ASStatement{
+
+    public ASContinue() {
+    }
+
+    public ASContinue(int line, int col) {
+        this();
+        this.column = col;
+        this.line = line;
+    }
+    
+    
     
     public void accept(Visitor v, int t) {
         v.visit(this,t);

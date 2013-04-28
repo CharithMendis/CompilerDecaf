@@ -22,6 +22,12 @@ public class ASArray extends ASFieldDecl{
         this.name = name;
         this.size = size;
     }
+    
+    public ASArray(ASType type, String name, int size,int line,int col) {
+        this(type,name,size);
+        this.column = col;
+        this.line = line;
+    }
 
     
     public void accept(Visitor v, int t) {

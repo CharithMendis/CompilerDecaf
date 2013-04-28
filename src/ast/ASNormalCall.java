@@ -21,6 +21,12 @@ public class ASNormalCall extends ASMethodCall{
         this.name = name;
     }
     
+    public ASNormalCall(String name, int line,int col){
+        this(name);
+        this.line = line;
+        this.column = col;
+    } 
+    
     public void addArgument(ASExpr expr){
         arguments.add(expr);
     }

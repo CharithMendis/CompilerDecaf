@@ -22,6 +22,12 @@ public class ASVariable extends ASFieldDecl{
         this.name = name;
     }
     
+    public ASVariable(ASType type, String name,int line,int col){
+        this(type,name);
+        this.column = col;
+        this.line = line;
+    }
+    
     
     public void accept(Visitor v, int t) {
         v.visit(this,t);

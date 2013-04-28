@@ -25,6 +25,12 @@ public class ASFor extends ASStatement{
         this.var =  new ASLocationVar(name);
     }
     
+    public ASFor(String name,ASExpr startExpr, ASExpr endExpr, ASBlock block, int line, int col){
+        this(name,startExpr, endExpr, block);
+        this.line = line;
+        this.column = col;
+    }
+    
     public void accept(Visitor v, int t) {
         v.visit(this,t);
         ASUtilities.visit(var, t, v);

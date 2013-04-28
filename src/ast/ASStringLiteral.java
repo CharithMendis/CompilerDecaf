@@ -19,6 +19,12 @@ public class ASStringLiteral extends ASCalloutArg{
         this.argument = argument;
     }
     
+    public ASStringLiteral(String argument,int line, int col){
+        this(argument);
+        this.line = line;
+        this.column = col;
+    }
+    
     public void accept(Visitor v, int t) {
         v.visit(this,t);
     }

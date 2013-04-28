@@ -18,6 +18,13 @@ public class ASLocationVar extends ASLocation{
         this.name = name;
     }
     
+    public ASLocationVar(String name,int line,int col){
+        this(name);
+        this.column = col;
+        this.line = line;
+    }
+    
+    
     public void accept(Visitor v, int t) {
         v.visit(this,t);
     }

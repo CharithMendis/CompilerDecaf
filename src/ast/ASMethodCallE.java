@@ -19,6 +19,12 @@ public class ASMethodCallE extends ASExpr{
         this.method = method;
     }
     
+     public ASMethodCallE(ASMethodCall method, int line, int col){
+         this(method);
+         this.line = line;
+         this.column = col;
+     }
+    
     public void accept(Visitor v, int t) {
         v.visit(this, t);
         ASUtilities.visit(method, t, v);

@@ -19,6 +19,12 @@ public class ASBooleanLiteral extends ASLiteral{
         this.bool = bool;
     }
     
+    public ASBooleanLiteral(boolean bool,int line,int col){
+        this(bool);
+        this.line = line;
+        this.column = col;
+    }
+    
     public void accept(Visitor v, int t) {
         v.visit(this,t);
     }

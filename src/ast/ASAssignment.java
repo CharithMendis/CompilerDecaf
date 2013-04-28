@@ -40,6 +40,12 @@ public class ASAssignment extends ASStatement{
         }
     }
     
+    public ASAssignment(String operator,ASLocation location, ASExpr expr, int line, int col) {
+        this(operator,location, expr);
+        this.line = line;
+        this.column = col;
+    }
+    
     public void accept(Visitor v, int t) {
         
         v.visit(this,t);

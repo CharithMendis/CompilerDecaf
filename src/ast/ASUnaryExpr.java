@@ -36,6 +36,12 @@ public class ASUnaryExpr extends ASExpr{
         
     }
     
+    public ASUnaryExpr(String op, ASExpr expr,int line,int col){
+        this(op,expr);
+        this.line = line;
+        this.column = col;
+    }
+    
     public void accept(Visitor v, int t) {
         v.visit(this,t);
         ASUtilities.visit(expr, t, v);
