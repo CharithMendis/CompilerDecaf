@@ -6,6 +6,7 @@ package ast;
 
 import java.util.ArrayList;
 import semantic.Visitor;
+import semantic.VisitorWithReturn;
 
 /**
  *
@@ -13,8 +14,8 @@ import semantic.Visitor;
  */
 public class ASProgram extends AS{
     
-    private ArrayList<ASMethodDecl> methods;
-    private ArrayList<ASFieldDecl> fields;
+    public ArrayList<ASMethodDecl> methods;
+    public ArrayList<ASFieldDecl> fields;
 
     public ASProgram() {
         methods = new ArrayList<ASMethodDecl>();
@@ -39,6 +40,10 @@ public class ASProgram extends AS{
         }
     }
     
+    @Override
+    public Object acceptWithReturn(VisitorWithReturn v) {
+        return v.visit(this);
+    }
     
    
     

@@ -5,6 +5,7 @@
 package ast;
 
 import semantic.Visitor;
+import semantic.VisitorWithReturn;
 
 /**
  *
@@ -32,5 +33,9 @@ public class ASFor extends ASStatement{
         ASUtilities.visit(block, t, v);
     }
     
+    @Override
+    public Object acceptWithReturn(VisitorWithReturn v) {
+        return v.visit(this);
+    }
     
 }

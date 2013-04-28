@@ -6,6 +6,7 @@ package ast;
 
 import java.util.ArrayList;
 import semantic.Visitor;
+import semantic.VisitorWithReturn;
 
 /**
  *
@@ -29,6 +30,11 @@ public class ASLibraryCall extends ASMethodCall{
         for(int i=0;i<arguments.size();i++){
             ASUtilities.visit(arguments.get(i), t, v);
         }
+    }
+    
+    @Override
+    public Object acceptWithReturn(VisitorWithReturn v) {
+        return v.visit(this);
     }
     
     

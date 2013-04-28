@@ -6,6 +6,7 @@ package ast;
 
 import java.util.ArrayList;
 import semantic.Visitor;
+import semantic.VisitorWithReturn;
 
 /**
  *
@@ -38,6 +39,11 @@ public class ASBlock extends ASStatement{
         for(int i=0;i<statements.size();i++){
             ASUtilities.visit(statements.get(i), t, v);
         }
+    }
+    
+    @Override
+    public Object acceptWithReturn(VisitorWithReturn v) {
+        return v.visit(this);
     }
 
 }

@@ -5,9 +5,11 @@ import antlr.*;
 import ast.ASProgram;
 import java6035.tools.CLI.*;
 import semantic.DebugVisitor;
+import semantic.SemanticVisitor;
+import semantic.SymbolTablePrinter;
 
 class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception{
         try {
         	CLI.parse (args, new String[0]);
         	
@@ -73,13 +75,17 @@ class Main {
         		DecafScanner lexer = new DecafScanner(new DataInputStream(inputStream));
         		DecafParser parser = new DecafParser (lexer);
                         ASProgram p = parser.program();
-                        p.accept(new DebugVisitor(), null);
-                        
+                        p.accept(new DebugVisitor(),0);
+                        SemanticVisitor v = new SemanticVisitor();
+                        p.acceptWithReturn(v);
+                        SymbolTablePrinter print = new SymbolTablePrinter(v.top);
+                        print.print();
                         System.exit(0);
                         
                         } catch(Exception e) {
                             System.out.println(e);
-                            System.exit(1);
+                            throw e;
+                            //System.exit(1);
                         }
                         
                         //AST ast = parser.getAST();
@@ -90,6 +96,7 @@ class Main {
         } catch(Exception e) {
         	// print the error:
             System.out.println(CLI.infile+" "+e);
+            throw e;
         }
     }
    

@@ -5,6 +5,7 @@
 package ast;
 
 import semantic.Visitor;
+import semantic.VisitorWithReturn;
 
 /**
  *
@@ -21,4 +22,8 @@ public class ASLocationVar extends ASLocation{
         v.visit(this,t);
     }
  
+    @Override
+    public Object acceptWithReturn(VisitorWithReturn v) {
+        return v.visit(this);
+    }
 }

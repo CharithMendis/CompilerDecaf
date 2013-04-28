@@ -11,13 +11,17 @@ package ast;
 public class ASType {
     public int type;
     public String stringType;
+    public ASType element;
     
-    public static final int INT = 1;
-    public static final int BOOLEAN = 2;
-    public static final int VOID = 3;
-    public static final int ERROR = 4;
+    public static final int INT             = 1;
+    public static final int BOOLEAN         = 2;
+    public static final int INTARRAY        = 3;
+    public static final int BOOLEANARRAY    = 3;
+    public static final int VOID            = 5;
+    public static final int ERROR           = 6;
 
     public ASType(String type) {
+        this.element = null;
         this.stringType = type;
         switch (type) {
             case "int":
@@ -28,6 +32,14 @@ public class ASType {
                 break;
             case "void":
                 this.type = VOID;
+                break;
+            case "intarray":
+                this.type = INTARRAY;
+                this.element = new ASType("int");
+                break;
+            case "booleanarray":
+                this.type = BOOLEANARRAY;
+                this.element = new ASType("boolean");
                 break;
             default:
                 this.type = ERROR;

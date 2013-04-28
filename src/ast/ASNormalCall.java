@@ -6,6 +6,7 @@ package ast;
 
 import java.util.ArrayList;
 import semantic.Visitor;
+import semantic.VisitorWithReturn;
 
 /**
  *
@@ -31,6 +32,10 @@ public class ASNormalCall extends ASMethodCall{
         }
     }
     
+    @Override
+    public Object acceptWithReturn(VisitorWithReturn v) {
+        return v.visit(this);
+    }
     
     
 }

@@ -5,6 +5,7 @@
 package ast;
 
 import semantic.Visitor;
+import semantic.VisitorWithReturn;
 
 /**
  *
@@ -13,5 +14,10 @@ import semantic.Visitor;
 public abstract class AS {
     
     abstract public void accept(Visitor v, int t);
+    
+    abstract public Object acceptWithReturn(VisitorWithReturn v);
+    
+    public int line;
+    public int column;
         
 }

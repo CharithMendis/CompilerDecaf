@@ -5,6 +5,7 @@
 package ast;
 
 import semantic.Visitor;
+import semantic.VisitorWithReturn;
 
 /**
  *
@@ -38,5 +39,9 @@ public class ASIf extends ASStatement{
             ASUtilities.visit(elsestat, t, v);
     }
     
+    @Override
+    public Object acceptWithReturn(VisitorWithReturn v) {
+        return v.visit(this);
+    }
     
 }

@@ -50,9 +50,9 @@ field_decl [ASProgram p]
             }
             : 
             t=type (id1:ID {p.addFieldDecl(new ASVariable(t,id1.getText()));} | 
-                        (id2:ID LBRAC a1=int_literal RBRAC {p.addFieldDecl(new ASArray(t,id2.getText(),a1));}))
+                        (id2:ID LBRAC a1=int_literal RBRAC {p.addFieldDecl(new ASArray(new ASType(t.stringType + "array"),id2.getText(),a1));}))
                    (COMMA (id3:ID {p.addFieldDecl(new ASVariable(t,id3.getText()));} | 
-                        (id4:ID LBRAC a2=int_literal RBRAC{p.addFieldDecl(new ASArray(t,id4.getText(),a2));})))* SEMI!;
+                        (id4:ID LBRAC a2=int_literal RBRAC{p.addFieldDecl(new ASArray(new ASType(t.stringType + "array"),id4.getText(),a2));})))* SEMI!;
 
 protected int_literal returns [int y]
         {
@@ -76,33 +76,41 @@ method_decl [ASProgram p]
                 ASBlock b=null;
             }
             : (t=type|k:TK_void {t = new ASType(k.getText());}) 
-               n:ID {dec = new ASMethodDecl(t,n.getText());} LPARA (var[dec,null])? RPARA b=block
+               n:ID {dec = new ASMethodDecl(t,n.getText());} LPARA (varparameter[dec])? RPARA b=block
                {
                     dec.addBlock(b);
                     p.addMethodDecl(dec);
                }
             ;
 
-//done
-protected var [ASMethodDecl d,ASBlock b] //variable decl or method decl
+protected varparameter [ASMethodDecl d] 
             {
                 ASType t1,t2;
             }
             : (t1=type id1:ID {
-                        if(d!=null)
-                            d.addParameters(new ASVariable(t1,id1.getText()));
-                        else
-                            b.addVar(new ASVariable(t1,id1.getText()));
+                     d.addParameters(new ASVariable(t1,id1.getText()));
+                        
                })
               (COMMA t2=type id2:ID {
-                        if(d!=null)
-                            d.addParameters(new ASVariable(t2,id2.getText()));
-                        else
-                            b.addVar(new ASVariable(t2,id2.getText()));
+                      d.addParameters(new ASVariable(t2,id2.getText()));
+
                })* ;
 
 //done
-var_decl [ASBlock b] : var[null,b] SEMI! ;
+protected var [ASBlock b] 
+            {
+                ASType t1,t2;
+            }
+            : (t1=type id1:ID {   
+                      b.addVar(new ASVariable(t1,id1.getText()));
+               })
+              (COMMA id2:ID {
+                        
+                      b.addVar(new ASVariable(t1,id2.getText()));
+               })* ;
+
+//done
+var_decl [ASBlock b] : var[b] SEMI! ;
 
 //done
 block returns [ASBlock b]
@@ -192,7 +200,7 @@ pre_method_location returns [ASExpr expr]
                 expr=null;
                 ASMethodCall r;
              }
-             : (method_name LPARA) => r=method_call {expr = new ASMethodCallE(r);}
+             : ( (TK_callout|method_name) LPARA) => r=method_call {expr = new ASMethodCallE(r);}
              | expr=location ;
 
 //done

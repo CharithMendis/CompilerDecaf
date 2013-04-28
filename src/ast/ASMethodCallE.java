@@ -5,6 +5,7 @@
 package ast;
 
 import semantic.Visitor;
+import semantic.VisitorWithReturn;
 
 /**
  *
@@ -23,4 +24,8 @@ public class ASMethodCallE extends ASExpr{
         ASUtilities.visit(method, t, v);
     }
       
+    @Override
+    public Object acceptWithReturn(VisitorWithReturn v) {
+        return v.visit(this);
+    }
 }

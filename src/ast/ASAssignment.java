@@ -5,6 +5,7 @@
 package ast;
 
 import semantic.Visitor;
+import semantic.VisitorWithReturn;
 
 /**
  *
@@ -47,5 +48,12 @@ public class ASAssignment extends ASStatement{
         ASUtilities.visit(location, t, v);
         ASUtilities.visit(expr, t, v);
     }
+
+    @Override
+    public Object acceptWithReturn(VisitorWithReturn v) {
+        return v.visit(this);
+    }
+    
+    
     
 }

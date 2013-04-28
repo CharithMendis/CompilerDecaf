@@ -4,32 +4,27 @@
  */
 package semantic;
 
+import ast.AS;
 import ast.ASArray;
 import ast.ASAssignment;
 import ast.ASBinaryExpr;
 import ast.ASBlock;
 import ast.ASBooleanLiteral;
 import ast.ASBreak;
-import ast.ASCalloutArg;
 import ast.ASCharLiteral;
 import ast.ASContinue;
-import ast.ASExpr;
-import ast.ASFieldDecl;
 import ast.ASFor;
 import ast.ASIf;
 import ast.ASIntLiteral;
 import ast.ASLibraryCall;
-import ast.ASLiteral;
 import ast.ASLocationArray;
 import ast.ASLocationVar;
-import ast.ASMethodCall;
 import ast.ASMethodCallE;
 import ast.ASMethodCallS;
 import ast.ASMethodDecl;
 import ast.ASNormalCall;
 import ast.ASProgram;
 import ast.ASReturn;
-import ast.ASStatement;
 import ast.ASStringLiteral;
 import ast.ASUnaryExpr;
 import ast.ASVariable;
@@ -39,6 +34,13 @@ import ast.ASVariable;
  * @author Charith
  */
 public class DebugVisitor implements Visitor{
+    
+    
+    public static void accept(AS val,int t,Visitor v){
+        Class c = val.getClass();
+        c.cast(val);
+        val.accept(v, t+1);
+    }
     
     public void keepTab(int t){
         for(int i=0;i<t;i++){
@@ -74,7 +76,6 @@ public class DebugVisitor implements Visitor{
     public void visit(ASAssignment assign, int t) {
         keepTab(t);
         System.out.println("assign: " + assign.stringop);
-        //System.out.println(((ASBinaryExpr)assign.expr).operator);
     }
 
     @Override
