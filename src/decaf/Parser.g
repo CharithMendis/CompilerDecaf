@@ -403,8 +403,8 @@ protected literal returns [ASLiteral l]
         }
         : val=int_literal {l = new ASIntLiteral(val.i,val.line,val.column);}
         | j:CHAR    {l = new ASCharLiteral(j.getText().toCharArray()[0],j.getLine(),j.getColumn());}
-        | k:TK_true {l = new ASBooleanLiteral(k.getText().equals("true"),k.getLine(),k.getColumn());} 
-        | m:TK_false{l = new ASBooleanLiteral(m.getText().equals("false"),m.getLine(),m.getColumn());} ;
+        | k:TK_true {l = new ASBooleanLiteral(true,k.getLine(),k.getColumn());} 
+        | m:TK_false{l = new ASBooleanLiteral(false,m.getLine(),m.getColumn());} ;
 
 //done
 protected type returns [ASType t]

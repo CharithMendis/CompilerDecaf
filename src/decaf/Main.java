@@ -69,37 +69,40 @@ class Main {
         	        }
         		}
         	}
-        	else if (CLI.target == CLI.PARSE || CLI.target == CLI.DEFAULT)
+        	else if (CLI.target == CLI.PARSE || CLI.target == CLI.INTER || CLI.target == CLI.DEFAULT)
         	{
-                        try{
+                  try{
         		DecafScanner lexer = new DecafScanner(new DataInputStream(inputStream));
         		DecafParser parser = new DecafParser (lexer);
                         ASProgram p = parser.program();
-                        p.accept(new DebugVisitor(),0);
                         
-                        String name = CLI.infile;
-                        File f = new File(name);
-                        
-                        SemanticVisitor v = new SemanticVisitor(f.getName(),true);
-                        p.acceptWithReturn(v);
-                        SymbolTablePrinter print = new SymbolTablePrinter(v.top);
-                        print.print();
+                        if(CLI.target == CLI.INTER  || CLI.target == CLI.DEFAULT){
+                            
+                            String name = CLI.infile;
+                            File f = new File(name);
+                            
+                            SemanticVisitor v = new SemanticVisitor(f.getName(),true);
+                            p.acceptWithReturn(v);
+                            
+                            if(CLI.debug){
+                                System.out.println("\n***************AST*******************");
+                                p.accept(new DebugVisitor(),0);
+                                System.out.println("\n***************SYMBOL TABLE*******************");
+                                SymbolTablePrinter print = new SymbolTablePrinter(v.top);
+                                print.print();
+                            }
+                        }
                         System.exit(0);
-                        
                         } catch(Exception e) {
                             System.out.println(e);
-                            throw e;
                             //System.exit(1);
+                            throw e;
+                            
                         }
-                        
-                        //AST ast = parser.getAST();
-                        //System.out.println(ast.toStringList());
-                       
         	}
+                
         	
         } catch(Exception e) {
-        	// print the error:
-            System.out.println(CLI.infile+" "+e);
             throw e;
         }
     }

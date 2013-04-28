@@ -113,5 +113,10 @@ public class SemanticErrorPrint {
         System.out.println("the main method should not have any parameters");
     }
     
+    public void printMainNotDeclared(int line,int column){
+        printFirstError(line,column);
+        System.out.println("the main method is not declared");
+    }
+    
     
 }

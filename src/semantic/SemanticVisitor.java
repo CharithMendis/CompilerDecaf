@@ -46,11 +46,8 @@ import semantic.symbol.VariableDescriptor;
 //limitations - 
 //no two methods can have same names - overrided methods not allowed
 //field and method cannot have the same name = this can be remedied in next stages.
-//callout methods cannot be used in exprs.
 
 //need to check return statement
-//casting in ASMethodCallE
-
 //error - means it is being dealt somewhere / NA - means a callout give a warning
 
 public class SemanticVisitor implements VisitorWithReturn{
@@ -117,7 +114,7 @@ public class SemanticVisitor implements VisitorWithReturn{
     private boolean checkType(int actual, int tobechecked){
         return (actual != tobechecked && actual != ASType.ERROR && actual != ASType.NA);
     }
-    
+    //end of common functionality
     
     @Override
     public Object visit(ASProgram p) {
@@ -139,12 +136,14 @@ public class SemanticVisitor implements VisitorWithReturn{
         //ERROR
         if(mdes == null){
             //CHECK
-            error.printNotDeclared("main",SemanticErrorPrint.METHOD,p.line,p.column);
+            error.printMainNotDeclared(p.line,p.column);
+            noOfErrors++;
         }
         else{
             //ERROR
             if(!mdes.parameters.isEmpty()){
                 error.printMainError(mdes.line,mdes.column);
+                noOfErrors++;
             }
         }
         
@@ -264,6 +263,7 @@ public class SemanticVisitor implements VisitorWithReturn{
                (lhs.type != ASType.ERROR && rhs.type != ASType.ERROR)){
                 //error - means it is being dealt somewhere / NA - means a callout give a warning
                 error.printTypeErrorVariable(lhs.stringType, rhs.stringType, assign.stringop,assign.line,assign.column);
+                noOfErrors++;
             }
             
         }
@@ -274,6 +274,7 @@ public class SemanticVisitor implements VisitorWithReturn{
                (lhs.type != ASType.ERROR || rhs.type != ASType.ERROR)){
                 
                 error.printTypeErrorVariable(lhs.stringType, rhs.stringType, assign.stringop,assign.line,assign.column);
+                noOfErrors++;
             }
             
         }
@@ -287,6 +288,7 @@ public class SemanticVisitor implements VisitorWithReturn{
         //ERROR
         if(!isFor){
             error.printBreakOrContError("break",b.line,b.column);
+            noOfErrors++;
         }
         
         return null;
@@ -298,6 +300,7 @@ public class SemanticVisitor implements VisitorWithReturn{
         //ERROR
         if(!isFor){
             error.printBreakOrContError("continue",c.line,c.column);
+            noOfErrors++;
         }
         
         
@@ -320,9 +323,10 @@ public class SemanticVisitor implements VisitorWithReturn{
         ASType end = (ASType)f.endExpr.acceptWithReturn(this);
         
         //ERROR
-        if( (checkType(start.type,ASType.INT)) &&
+        if( (checkType(start.type,ASType.INT)) ||
             (checkType(end.type,ASType.INT))){
             error.printForError(start.stringType, end.stringType,f.line,f.column);
+            noOfErrors++;
         }
         
         f.block.acceptWithReturn(this);
@@ -344,6 +348,7 @@ public class SemanticVisitor implements VisitorWithReturn{
         //ERROR
         if(checkType(t.type,ASType.BOOLEAN)){
             error.printIfError(t.stringType,f.line,f.column);
+            noOfErrors++;
         }
         f.ifstat.acceptWithReturn(this);
         if(f.elsePresent){
@@ -362,16 +367,19 @@ public class SemanticVisitor implements VisitorWithReturn{
             //ERROR cannot return a value
             if(ret.returnExpr != null){
                 error.printNoReturnError(currentMethod.name,ret.line,ret.column);
+                noOfErrors++;
             }
         }
         else{
             if(ret.returnExpr == null){
                 error.printReturnTypeError(currentMethod.name, currentMethod.returnValue.stringType,ret.line,ret.column);
+                noOfErrors++;
             }
             else{
                 ASType t = (ASType)ret.returnExpr.acceptWithReturn(this);
                 if(checkType(t.type,currentMethod.returnValue.type)){
                     error.printReturnTypeError(currentMethod.name, currentMethod.returnValue.stringType,ret.line,ret.column);
+                    noOfErrors++;
                 }
             }
         }
@@ -397,6 +405,7 @@ public class SemanticVisitor implements VisitorWithReturn{
             //ERROR
             if(checkType(lhs.type,ASType.INT) || checkType(rhs.type,ASType.INT)){
                 error.printTypeErrorVariable(lhs.stringType,rhs.stringType,ex.stringop,ex.line,ex.column);
+                noOfErrors++;
                 return new ASType("error");
             }
             else if(ex.operator==ASBinaryExpr.GE ||
@@ -415,6 +424,7 @@ public class SemanticVisitor implements VisitorWithReturn{
                (lhs.type != ASType.ERROR && rhs.type != ASType.ERROR) &&
                (lhs.type != ASType.NA && rhs.type != ASType.NA)){
                 error.printTypeErrorVariable(lhs.stringType,rhs.stringType,ex.stringop,ex.line,ex.column);
+                noOfErrors++;
                 return new ASType("error");
             }
             else{
@@ -424,6 +434,7 @@ public class SemanticVisitor implements VisitorWithReturn{
         else{
             if(checkType(lhs.type,ASType.BOOLEAN) || checkType(rhs.type, ASType.BOOLEAN)){
                 error.printTypeErrorVariable(lhs.stringType,rhs.stringType,ex.stringop,ex.line,ex.column);
+                noOfErrors++;
                 return new ASType("error");
             }
             else{
@@ -485,12 +496,14 @@ public class SemanticVisitor implements VisitorWithReturn{
         //ERROR
         if(des == null){
             error.printNotDeclared(array.name, SemanticErrorPrint.VARIABLE,array.line,array.column);
+            noOfErrors++;
         }
         else{
             
             //ERROR
             if(des.getClass() != ArrayDescriptor.class){
                 error.printArrayTypeError(array.name,array.line,array.column);
+                noOfErrors++;
             }
             else{
                 ArrayDescriptor ades = (ArrayDescriptor)des;
@@ -498,6 +511,7 @@ public class SemanticVisitor implements VisitorWithReturn{
                 //ERROR
                 if(checkType(t.type,ASType.INT)){
                     error.printArrayLocationError(array.name,array.line,array.column);
+                    noOfErrors++;
                 }
                 else{
                     return ades.type.element;
@@ -512,14 +526,21 @@ public class SemanticVisitor implements VisitorWithReturn{
     @Override
     public Object visit(ASLocationVar var) {
         
-        VariableDescriptor des = (VariableDescriptor)current.get(var.name);
+        Descriptor des = (Descriptor)current.get(var.name);
         
         //ERROR
         if(des == null){
             error.printNotDeclared(var.name, SemanticErrorPrint.VARIABLE,var.line,var.column);
+            noOfErrors++;
         }
         else{
-            return des.type;
+            Class c = des.getClass();
+            if(c == ArrayDescriptor.class){
+                return ((ArrayDescriptor)des).type;
+            }
+            else{
+                return ((VariableDescriptor)des).type;
+            }
         }
         return new ASType("error");
     }
@@ -549,6 +570,7 @@ public class SemanticVisitor implements VisitorWithReturn{
         else{
             if(warning && t.type == ASType.NA){
                 error.printWarningAboutCallout(call.line, call.column);
+                noOfErrors++;
             }
             return t;
         }
