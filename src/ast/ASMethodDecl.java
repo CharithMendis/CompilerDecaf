@@ -41,10 +41,7 @@ public class ASMethodDecl extends AS{
     
     public void accept(Visitor v, int t) {
         v.visit(this,t);
-        for(int i=0;i<parameters.size();i++){
-            ASUtilities.visit(parameters.get(i), t, v);
-        }
-        ASUtilities.visit(block, t, v);
+        
     }
     
     @Override

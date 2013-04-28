@@ -37,8 +37,7 @@ public class ASReturn extends ASStatement{
     
     public void accept(Visitor v, int t) {
         v.visit(this,t);
-        if(returnExpr != null)
-           ASUtilities.visit(returnExpr, t, v);
+        
     }
     
     @Override

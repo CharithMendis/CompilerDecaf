@@ -39,12 +39,7 @@ public class ASBlock extends ASStatement{
     
     public void accept(Visitor v, int t) {
         v.visit(this,t);
-        for(int i=0;i<var.size();i++){
-            ASUtilities.visit(var.get(i), t, v);
-        }
-        for(int i=0;i<statements.size();i++){
-            ASUtilities.visit(statements.get(i), t, v);
-        }
+       
     }
     
     @Override

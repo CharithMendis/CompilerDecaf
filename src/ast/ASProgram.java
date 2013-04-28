@@ -38,12 +38,7 @@ public class ASProgram extends AS{
     
     public void accept(Visitor v, int t){
         v.visit(this, t);
-        for(int i=0;i<fields.size();i++){
-            ASUtilities.visit(fields.get(i), t, v);
-        }
-        for(int i=0;i<methods.size();i++){
-            ASUtilities.visit(methods.get(i), t, v);
-        }
+        
     }
     
     @Override

@@ -39,10 +39,7 @@ public class ASIf extends ASStatement{
     
     public void accept(Visitor v, int t) {
         v.visit(this,t);
-        ASUtilities.visit(condition, t, v);
-        ASUtilities.visit(ifstat, t, v);
-        if(elsePresent)
-            ASUtilities.visit(elsestat, t, v);
+        
     }
     
     @Override

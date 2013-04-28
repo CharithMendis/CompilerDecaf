@@ -33,10 +33,7 @@ public class ASFor extends ASStatement{
     
     public void accept(Visitor v, int t) {
         v.visit(this,t);
-        ASUtilities.visit(var, t, v);
-        ASUtilities.visit(startExpr, t, v);
-        ASUtilities.visit(endExpr, t, v);
-        ASUtilities.visit(block, t, v);
+        
     }
     
     @Override

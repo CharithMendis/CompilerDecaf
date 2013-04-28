@@ -52,12 +52,22 @@ public class DebugVisitor implements Visitor{
     public void visit(ASProgram p, int t) {
         keepTab(t);
         System.out.println("program");
+        for(int i=0;i<p.fields.size();i++){
+            accept(p.fields.get(i), t, this);
+        }
+        for(int i=0;i<p.methods.size();i++){
+            accept(p.methods.get(i), t, this);
+        }
     }
 
     @Override
     public void visit(ASMethodDecl m, int t) {
         keepTab(t);
         System.out.println("method_decl: " + m.type.stringType + " " + m.name);
+        for(int i=0;i<m.parameters.size();i++){
+            accept(m.parameters.get(i), t, this);
+        }
+        accept(m.block, t, this);
     }
 
     @Override
@@ -76,6 +86,8 @@ public class DebugVisitor implements Visitor{
     public void visit(ASAssignment assign, int t) {
         keepTab(t);
         System.out.println("assign: " + assign.stringop);
+        accept(assign.location, t, this);
+        accept(assign.expr, t, this);
     }
 
     @Override
@@ -94,30 +106,43 @@ public class DebugVisitor implements Visitor{
     public void visit(ASFor f, int t) {
         keepTab(t);
         System.out.println("for:");
+        accept(f.var, t, this);
+        accept(f.startExpr, t, this);
+        accept(f.endExpr, t, this);
+        accept(f.block, t, this);
     }
 
     @Override
     public void visit(ASIf f, int t) {
         keepTab(t);
         System.out.println("if:");
+        accept(f.condition, t, this);
+        accept(f.ifstat, t, this);
+        if(f.elsePresent)
+            accept(f.elsestat, t, this);
     }
 
     @Override
     public void visit(ASMethodCallS call, int t) {
         keepTab(t);
         System.out.println("method call");
+        accept(call.method, t, this);
     }
 
     @Override
     public void visit(ASReturn ret, int t) {
         keepTab(t);
         System.out.println("Return: ");
+        if(ret.returnExpr != null)
+           accept(ret.returnExpr, t, this);
     }
 
     @Override
     public void visit(ASBinaryExpr ex, int t) {
         keepTab(t);
         System.out.println("BinaryOp: " + ex.stringop);
+        accept(ex.lhs, t, this);
+        accept(ex.rhs, t, this);
     }
 
     @Override
@@ -142,6 +167,7 @@ public class DebugVisitor implements Visitor{
     public void visit(ASLocationArray array, int t) {
         keepTab(t);
         System.out.println("ArrayLocation: " + array.name);
+        accept(array.location, t, this);
     }
 
     @Override
@@ -154,6 +180,7 @@ public class DebugVisitor implements Visitor{
     public void visit(ASMethodCallE call, int t) {
         keepTab(t);
         System.out.println("method call");
+        accept(call.method, t, this);
     }
 
     @Override
@@ -166,24 +193,37 @@ public class DebugVisitor implements Visitor{
     public void visit(ASUnaryExpr ex, int t) {
         keepTab(t);
         System.out.println("UnaryExpr: " + ex.stringop);
+        accept(ex.expr, t, this);
     }
 
     @Override
     public void visit(ASLibraryCall m, int t) {
         keepTab(t);
         System.out.println("LibraryCall: " + m.name);
+        for(int i=0;i<m.arguments.size();i++){
+            accept(m.arguments.get(i), t, this);
+        }
     }
 
     @Override
     public void visit(ASNormalCall l, int t) {
         keepTab(t);
         System.out.println("NormalCall: " + l.name);
+        for(int i=0;i<l.arguments.size();i++){
+            accept(l.arguments.get(i), t, this);
+        }
     }
 
     @Override
     public void visit(ASBlock block, int t) {
         keepTab(t);
         System.out.println("block:");
+        for(int i=0;i<block.var.size();i++){
+            accept(block.var.get(i), t, this);
+        }
+        for(int i=0;i<block.statements.size();i++){
+            accept(block.statements.get(i), t, this);
+        }
     }
 
     

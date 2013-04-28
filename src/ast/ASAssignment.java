@@ -49,10 +49,7 @@ public class ASAssignment extends ASStatement{
     public void accept(Visitor v, int t) {
         
         v.visit(this,t);
-        
-        //visit other classes
-        ASUtilities.visit(location, t, v);
-        ASUtilities.visit(expr, t, v);
+     
     }
 
     @Override

@@ -28,7 +28,7 @@ public class ASMethodCallS extends ASStatement{
     
     public void accept(Visitor v, int t) {
         v.visit(this,t);
-        ASUtilities.visit(method, t, v);
+        
     }
     
     @Override

@@ -33,9 +33,7 @@ public class ASLibraryCall extends ASMethodCall{
     
     public void accept(Visitor v, int t) {
         v.visit(this,t);
-        for(int i=0;i<arguments.size();i++){
-            ASUtilities.visit(arguments.get(i), t, v);
-        }
+        
     }
     
     @Override

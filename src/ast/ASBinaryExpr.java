@@ -88,9 +88,6 @@ public class ASBinaryExpr extends ASExpr{
     public void accept(Visitor v, int t) {
         v.visit(this,t);
         
-        //visit other classes
-        ASUtilities.visit(lhs, t, v);
-        ASUtilities.visit(rhs, t, v);
     }
     
     @Override

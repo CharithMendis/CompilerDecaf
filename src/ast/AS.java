@@ -19,5 +19,7 @@ public abstract class AS {
     
     public int line;
     public int column;
+    
+
         
 }
