@@ -52,8 +52,9 @@ program returns [ASProgram p]
                     {
                         p = new ASProgram();
                     }
-                    : TK_class i:TK_Program {p.line = i.getLine(); p.column = i.getColumn();}LCURLY 
-                     (field_decl[p])* (method_decl[p])* RCURLY;
+                    : TK_class TK_Program LCURLY 
+                     (field_decl[p])* (method_decl[p])* i:RCURLY {p.line = i.getLine(); p.column = i.getColumn();}
+                    ;
 //done - line / col
 field_decl [ASProgram p]
             {

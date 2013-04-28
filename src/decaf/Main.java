@@ -80,7 +80,7 @@ class Main {
                         String name = CLI.infile;
                         File f = new File(name);
                         
-                        SemanticVisitor v = new SemanticVisitor(f.getName());
+                        SemanticVisitor v = new SemanticVisitor(f.getName(),true);
                         p.acceptWithReturn(v);
                         SymbolTablePrinter print = new SymbolTablePrinter(v.top);
                         print.print();

@@ -19,6 +19,7 @@ public class ASType {
     public static final int BOOLEANARRAY    = 3;
     public static final int VOID            = 5;
     public static final int ERROR           = 6;
+    public static final int NA              = 7;
 
     public ASType(String type) {
         this.element = null;
@@ -40,6 +41,9 @@ public class ASType {
             case "booleanarray":
                 this.type = BOOLEANARRAY;
                 this.element = new ASType("boolean");
+                break;
+            case "na":
+                this.type = NA;
                 break;
             default:
                 this.type = ERROR;

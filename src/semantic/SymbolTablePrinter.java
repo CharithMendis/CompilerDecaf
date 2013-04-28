@@ -26,7 +26,6 @@ public class SymbolTablePrinter {
     
     public void print(){
         //special print to handle the top layer
-        System.out.println("\n***********SYMBOL TABLE*********************\n");
         Set<String> keys = en.symbolTable.keySet();
         String[] symbols = keys.toArray(new String[0]);
         for(int i=0;i<symbols.length;i++){
