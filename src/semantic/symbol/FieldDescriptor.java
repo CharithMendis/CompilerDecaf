@@ -4,16 +4,14 @@
  */
 package semantic.symbol;
 
+import ast.ASType;
+
 /**
  *
  * @author Charith
  */
-public abstract class Descriptor {
+public abstract class FieldDescriptor extends Descriptor{
     
-    abstract public void print();
-    
-    public int line;
-    public int column;
-    public String name;
+    public ASType type;
     
 }

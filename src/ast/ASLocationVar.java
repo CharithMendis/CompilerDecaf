@@ -16,6 +16,9 @@ public class ASLocationVar extends ASLocation{
 
     public ASLocationVar(String name) {
         this.name = name;
+        this.load = null;
+        this.store = null;
+        this.isStore = false;
     }
     
     public ASLocationVar(String name,int line,int col){

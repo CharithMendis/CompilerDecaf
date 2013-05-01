@@ -118,5 +118,15 @@ public class SemanticErrorPrint {
         System.out.println("the main method is not declared");
     }
     
+    public void printNotMethodError(String name,int line,int column){
+        printFirstError(line,column);
+        System.out.println("\'" + name + "\' is not a method");
+    }
+    
+    public void printNotVariableError(String name,int line,int column){
+        printFirstError(line,column);
+        System.out.println("\'" + name + "\' is not a variable");
+    }
+    
     
 }

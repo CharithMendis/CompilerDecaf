@@ -10,16 +10,20 @@ import ast.ASType;
  *
  * @author Charith
  */
-public class VariableDescriptor extends Descriptor{
+public class VariableDescriptor extends FieldDescriptor{
     
-    public ASType type;
-    public String name;
+    public int kind;
+    
+    public static final int FIELD = 1;
+    public static final int PARA  = 2;
+    public static final int LOCAL = 3;
 
     public VariableDescriptor(ASType type, String name,int line,int col) {
         this.type = type;
         this.name = name;
         this.line = line;
         this.column = col;
+        this.kind = LOCAL;
     }
 
     @Override

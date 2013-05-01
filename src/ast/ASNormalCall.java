@@ -4,6 +4,7 @@
  */
 package ast;
 
+import ir.high.IRMethod;
 import java.util.ArrayList;
 import semantic.Visitor;
 import semantic.VisitorWithReturn;
@@ -15,10 +16,12 @@ import semantic.VisitorWithReturn;
 public class ASNormalCall extends ASMethodCall{
     
     public ArrayList<ASExpr> arguments;
+    public IRMethod method;
 
     public ASNormalCall(String name) {
         arguments = new ArrayList();
         this.name = name;
+        this.method = null;
     }
     
     public ASNormalCall(String name, int line,int col){

@@ -4,6 +4,9 @@
  */
 package ast;
 
+import ir.high.IRLoad;
+import ir.high.IRStore;
+
 /**
  *
  * @author Charith
@@ -11,5 +14,9 @@ package ast;
 public abstract class ASLocation extends ASExpr{
     
     public String name;
+    
+    public IRStore store;
+    public IRLoad load;
+    public boolean isStore;
     
 }

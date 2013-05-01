@@ -10,10 +10,9 @@ import ast.ASType;
  *
  * @author Charith
  */
-public class ArrayDescriptor extends Descriptor{
+public class ArrayDescriptor extends FieldDescriptor{
     
-    public ASType type;
-    public String name;
+    
     public int size;
 
     public ArrayDescriptor(ASType type, String name,int size,int line,int col) {

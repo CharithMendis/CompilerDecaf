@@ -16,7 +16,6 @@ public class MethodDescriptor extends Descriptor{
     
     //I am using the same type class as that in the ast.
     public ASType returnValue;
-    public String name;
     public ArrayList<VariableDescriptor> parameters;
     public Environment env;   //has an environment
     
