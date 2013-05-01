@@ -4,7 +4,8 @@ import java.io.*;
 import antlr.*;
 import ast.ASProgram;
 import java6035.tools.CLI.*;
-import semantic.DebugVisitor;
+import semantic.ASTPrinter;
+import semantic.IRPrinter;
 import semantic.SemanticVisitor;
 import semantic.SymbolTablePrinter;
 
@@ -82,14 +83,16 @@ class Main {
                             File f = new File(name);
                             
                             SemanticVisitor v = new SemanticVisitor(f.getName(),true);
-                            p.acceptWithReturn(v);
+                            p.accept(v);
                             
                             if(CLI.debug){
                                 System.out.println("\n***************AST*******************");
-                                p.accept(new DebugVisitor(),0);
+                                p.accept(new ASTPrinter(),0);
                                 System.out.println("\n***************SYMBOL TABLE*******************");
                                 SymbolTablePrinter print = new SymbolTablePrinter(v.top);
                                 print.print();
+                                System.out.println("\n***************IR*******************");
+                                p.accept(new IRPrinter(),0);
                             }
                         }
                         System.exit(0);

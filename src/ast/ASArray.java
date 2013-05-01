@@ -5,6 +5,7 @@
 package ast;
 
 import semantic.Visitor;
+import semantic.VisitorWithPara;
 import semantic.VisitorWithReturn;
 
 /**
@@ -29,9 +30,13 @@ public class ASArray extends ASFieldDecl{
         this.line = line;
     }
 
-    
-    public void accept(Visitor v, int t) {
+    //visitors
+    public void accept(VisitorWithPara v, int t) {
         v.visit(this,t);
+    }
+    
+    public void accept(Visitor v) {
+        v.visit(this);
     }
 
     @Override

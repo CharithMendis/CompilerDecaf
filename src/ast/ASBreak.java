@@ -5,6 +5,7 @@
 package ast;
 
 import semantic.Visitor;
+import semantic.VisitorWithPara;
 import semantic.VisitorWithReturn;
 
 /**
@@ -26,8 +27,12 @@ public class ASBreak extends ASStatement{
     
     
     
-    public void accept(Visitor v, int t) {
+    public void accept(VisitorWithPara v, int t) {
         v.visit(this,t);
+    }
+    
+    public void accept(Visitor v) {
+        v.visit(this);
     }
     
     @Override

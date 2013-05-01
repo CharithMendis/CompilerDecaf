@@ -4,7 +4,7 @@
  */
 package ast;
 
-import semantic.Visitor;
+import semantic.VisitorWithPara;
 
 /**
  *

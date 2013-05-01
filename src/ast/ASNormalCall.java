@@ -7,6 +7,7 @@ package ast;
 import ir.high.IRMethod;
 import java.util.ArrayList;
 import semantic.Visitor;
+import semantic.VisitorWithPara;
 import semantic.VisitorWithReturn;
 
 /**
@@ -34,9 +35,14 @@ public class ASNormalCall extends ASMethodCall{
         arguments.add(expr);
     }
     
-    public void accept(Visitor v, int t) {
+    
+    public void accept(VisitorWithPara v, int t) {
         v.visit(this,t);
         
+    }
+    
+    public void accept(Visitor v) {
+        v.visit(this);
     }
     
     @Override

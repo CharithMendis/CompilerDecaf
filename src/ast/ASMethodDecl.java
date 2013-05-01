@@ -6,6 +6,7 @@ package ast;
 
 import java.util.ArrayList;
 import semantic.Visitor;
+import semantic.VisitorWithPara;
 import semantic.VisitorWithReturn;
 
 /**
@@ -39,9 +40,13 @@ public class ASMethodDecl extends AS{
         this.block = block;
     }   
     
-    public void accept(Visitor v, int t) {
+    public void accept(VisitorWithPara v, int t) {
         v.visit(this,t);
         
+    }
+    
+    public void accept(Visitor v) {
+        v.visit(this);
     }
     
     @Override

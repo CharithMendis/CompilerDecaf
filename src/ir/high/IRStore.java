@@ -12,7 +12,7 @@ import semantic.symbol.FieldDescriptor;
  */
 public class IRStore extends IR{
     
-    FieldDescriptor fdes;
+    public FieldDescriptor fdes;
 
     public IRStore(FieldDescriptor fdes) {
         this.fdes = fdes;

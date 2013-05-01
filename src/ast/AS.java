@@ -5,6 +5,7 @@
 package ast;
 
 import semantic.Visitor;
+import semantic.VisitorWithPara;
 import semantic.VisitorWithReturn;
 
 /**
@@ -18,7 +19,8 @@ public abstract class AS {
     
     public ASType typeIs;
     
-    abstract public void accept(Visitor v, int t);
+    abstract public void accept(VisitorWithPara v, int t);
+    abstract public void accept(Visitor v);
     abstract public Object acceptWithReturn(VisitorWithReturn v);
     
     

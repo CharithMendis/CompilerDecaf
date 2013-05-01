@@ -33,33 +33,34 @@ import ast.ASVariable;
  * @author Charith
  */
 public interface Visitor {
+    
     //program and decl
-    public void visit(ASProgram p, int t);
-    public void visit(ASMethodDecl m,int t);
+    public void visit(ASProgram p);
+    public void visit(ASMethodDecl m);
     //FieldDecl
-    public void visit(ASVariable var,int t);
-    public void visit(ASArray array,int t);
+    public void visit(ASVariable var);
+    public void visit(ASArray array);
     //statements
-    public void visit(ASAssignment assign,int t);
-    public void visit(ASBreak b,int t);
-    public void visit(ASContinue c,int t);
-    public void visit(ASFor f,int t);
-    public void visit(ASIf f,int t);
-    public void visit(ASMethodCallS call,int t);
-    public void visit(ASReturn ret,int t);
+    public void visit(ASAssignment assign);
+    public void visit(ASBreak b);
+    public void visit(ASContinue c);
+    public void visit(ASFor f);
+    public void visit(ASIf f);
+    public void visit(ASMethodCallS call);
+    public void visit(ASReturn ret);
     //callout arg + expr
-    public void visit(ASBinaryExpr ex,int t);
-    public void visit(ASBooleanLiteral b,int t);
-    public void visit(ASCharLiteral c,int t);
-    public void visit(ASIntLiteral i,int t);
-    public void visit(ASLocationArray array,int t);
-    public void visit(ASLocationVar var,int t);
-    public void visit(ASMethodCallE call,int t);
-    public void visit(ASStringLiteral l,int t);
-    public void visit(ASUnaryExpr ex,int t);
+    public void visit(ASBinaryExpr ex);
+    public void visit(ASBooleanLiteral b);
+    public void visit(ASCharLiteral c);
+    public void visit(ASIntLiteral i);
+    public void visit(ASLocationArray array);
+    public void visit(ASLocationVar var);
+    public void visit(ASMethodCallE call);
+    public void visit(ASStringLiteral l);
+    public void visit(ASUnaryExpr ex);
     //method call
-    public void visit(ASLibraryCall m,int t);
-    public void visit(ASNormalCall l,int t);
-    public void visit(ASBlock block,int t);
+    public void visit(ASLibraryCall m);
+    public void visit(ASNormalCall l);
+    public void visit(ASBlock block);
     
 }

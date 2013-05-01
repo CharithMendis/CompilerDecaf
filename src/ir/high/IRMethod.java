@@ -12,7 +12,7 @@ import semantic.symbol.MethodDescriptor;
  */
 public class IRMethod extends IR{
     
-    MethodDescriptor mdes;
+    public MethodDescriptor mdes;
 
     public IRMethod(MethodDescriptor mdes) {
         this.mdes = mdes;

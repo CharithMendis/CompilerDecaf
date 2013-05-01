@@ -4,7 +4,7 @@
  */
 package ast;
 
-import semantic.Visitor;
+import semantic.VisitorWithPara;
 
 /**
  *
@@ -12,7 +12,7 @@ import semantic.Visitor;
  */
 public class ASUtilities {
     
-    public static void visit(AS val,int t,Visitor v){
+    public static void visit(AS val,int t,VisitorWithPara v){
         Class c = val.getClass();
         c.cast(val);
         val.accept(v, t+1);

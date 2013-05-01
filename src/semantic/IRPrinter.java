@@ -33,10 +33,9 @@ import ast.ASVariable;
  *
  * @author Charith
  */
-public class DebugVisitor implements Visitor{
+public class IRPrinter implements VisitorWithPara{
     
-    
-    public static void accept(AS val,int t,Visitor v){
+    public static void accept(AS val,int t,VisitorWithPara v){
         Class c = val.getClass();
         c.cast(val);
         val.accept(v, t+1);
@@ -50,11 +49,6 @@ public class DebugVisitor implements Visitor{
 
     @Override
     public void visit(ASProgram p, int t) {
-        keepTab(t);
-        System.out.println("program");
-        for(int i=0;i<p.fields.size();i++){
-            accept(p.fields.get(i), t, this);
-        }
         for(int i=0;i<p.methods.size();i++){
             accept(p.methods.get(i), t, this);
         }
@@ -62,24 +56,18 @@ public class DebugVisitor implements Visitor{
 
     @Override
     public void visit(ASMethodDecl m, int t) {
-        keepTab(t);
         System.out.println("method_decl: " + m.type.stringType + " " + m.name);
-        for(int i=0;i<m.parameters.size();i++){
-            accept(m.parameters.get(i), t, this);
-        }
         accept(m.block, t, this);
     }
 
     @Override
     public void visit(ASVariable var, int t) {
-        keepTab(t);
-        System.out.println("var: " + var.type.stringType + " " + var.name);
+        //no need to print
     }
 
     @Override
     public void visit(ASArray array, int t) {
-        keepTab(t);
-        System.out.println("var: " + array.type.stringType + " " + array.name + "[" + array.size + "]");
+        //no need to print
     }
 
     @Override
@@ -106,8 +94,12 @@ public class DebugVisitor implements Visitor{
     public void visit(ASFor f, int t) {
         keepTab(t);
         System.out.println("for:");
-        accept(f.var, t, this);
+        //accept(f.var, t, this);
+        keepTab(t);
+        System.out.println("start: ");
         accept(f.startExpr, t, this);
+        keepTab(t);
+        System.out.println("end: ");
         accept(f.endExpr, t, this);
         accept(f.block, t, this);
     }
@@ -116,10 +108,17 @@ public class DebugVisitor implements Visitor{
     public void visit(ASIf f, int t) {
         keepTab(t);
         System.out.println("if:");
+        keepTab(t);
+        System.out.println("condition: ");
         accept(f.condition, t, this);
+        keepTab(t);
+        System.out.println("if ");
         accept(f.ifstat, t, this);
-        if(f.elsePresent)
+        if(f.elsePresent){
+            keepTab(t);
+            System.out.println("else ");
             accept(f.elsestat, t, this);
+        }
     }
 
     @Override
@@ -164,17 +163,54 @@ public class DebugVisitor implements Visitor{
     }
 
     @Override
-    public void visit(ASLocationArray array, int t) {
+    public void visit(ASLocationArray var, int t) {
         keepTab(t);
-        System.out.println("ArrayLocation: " + array.name);
-        accept(array.location, t, this);
+        if(var.isStore){
+            if(var.store != null) {
+                System.out.println("Store node: [" + var.store.fdes.type.stringType + "] " + var.name  + " " + var.store.fdes.line + ":" 
+                        + var.store.fdes.column + " ");
+            }
+            else {
+                System.out.println("Store node: [" + var.store + "] " + var.name);
+            }
+        }
+        else{
+            if(var.load != null) {
+                System.out.println("Load node: [" + var.load.fdes.type.stringType + "] " + var.name  + " " + var.load.fdes.line + ":" 
+                        + var.load.fdes.column + " ");
+            }
+            else {
+                System.out.println("Load node: [" + var.load + "] " + var.name);
+            }
+        }
+        keepTab(t+1);
+        System.out.println("Expression:");
+        accept(var.location, t+1, this);
     }
 
     @Override
     public void visit(ASLocationVar var, int t) {
         keepTab(t);
-        System.out.println("VarLocation: " + var.name);
+        if(var.isStore){
+            if(var.store != null) {
+                System.out.println("Store node: [" + var.store.fdes.type.stringType + "] " + var.name  + " " + var.store.fdes.line + ":" 
+                        + var.store.fdes.column + " ");
+            }
+            else {
+                System.out.println("Store node: [" + var.store + "] " + var.name);
+            }
+        }
+        else{
+            if(var.load != null) {
+                System.out.println("Load node: [" + var.load.fdes.type.stringType + "] " + var.name  + " " + var.load.fdes.line + ":" 
+                        + var.load.fdes.column + " ");
+            }
+            else {
+                System.out.println("Load node: [" + var.load + "] " + var.name);
+            }
+        }
     }
+    
 
     @Override
     public void visit(ASMethodCallE call, int t) {
@@ -208,7 +244,11 @@ public class DebugVisitor implements Visitor{
     @Override
     public void visit(ASNormalCall l, int t) {
         keepTab(t);
-        System.out.println("NormalCall: " + l.name);
+        System.out.print("NormalCall: " );
+        if(l.method != null){
+            System.out.println(l.name + " [" + l.method.mdes.returnValue.stringType + "] " + l.method.mdes.line + ":" 
+                    + l.method.mdes.column);
+        }
         for(int i=0;i<l.arguments.size();i++){
             accept(l.arguments.get(i), t, this);
         }
@@ -218,14 +258,9 @@ public class DebugVisitor implements Visitor{
     public void visit(ASBlock block, int t) {
         keepTab(t);
         System.out.println("block:");
-        for(int i=0;i<block.var.size();i++){
-            accept(block.var.get(i), t, this);
-        }
         for(int i=0;i<block.statements.size();i++){
             accept(block.statements.get(i), t, this);
         }
     }
-
-    
     
 }

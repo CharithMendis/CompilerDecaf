@@ -55,7 +55,7 @@ import semantic.symbol.VariableDescriptor;
 //need to check return statement
 //error - means it is being dealt somewhere / NA - means a callout give a warning
 
-public class SemanticVisitor implements VisitorWithReturn{
+public class SemanticVisitor implements Visitor{
 
     public Environment top;
     public Environment current;
@@ -127,18 +127,18 @@ public class SemanticVisitor implements VisitorWithReturn{
     //end of common functionality
     
     @Override
-    public Object visit(ASProgram p) {
+    public void visit(ASProgram p) {
         
         top = new Environment(null);
         current = top;
         
         for(int i=0;i<p.fields.size();i++){
             ASFieldDecl f = p.fields.get(i); //casting unnecessary but check
-            f.acceptWithReturn(this);
+            f.accept(this);
         }
         
         for(int i=0;i<p.methods.size();i++){
-            p.methods.get(i).acceptWithReturn(this);
+            p.methods.get(i).accept(this);
         }
         
         //Place to check the main method is there
@@ -162,12 +162,12 @@ public class SemanticVisitor implements VisitorWithReturn{
             System.out.println("Semantic Errors: "+ noOfErrors);
         }
         
-        return null;
+        
         
     }
 
     @Override
-    public Object visit(ASMethodDecl m) {
+    public void visit(ASMethodDecl m) {
         
         //create an descriptor
         MethodDescriptor mdes = new MethodDescriptor(m.type,m.name,current,m.line,m.column);
@@ -183,7 +183,7 @@ public class SemanticVisitor implements VisitorWithReturn{
         //put the parameter values
         for(int i=0;i<m.parameters.size();i++){
             //visit the parameters within the method
-            m.parameters.get(i).acceptWithReturn(this);
+            m.parameters.get(i).accept(this);
             if(currentParameter!=null){
                 currentParameter.kind = VariableDescriptor.PARA;
                 mdes.parameters.add(currentParameter);
@@ -195,16 +195,16 @@ public class SemanticVisitor implements VisitorWithReturn{
         current = mdes.env;  //current is the environment inside method descriptor
         
         //traverse the block with in the method decl
-        m.block.acceptWithReturn(this);  //block returns to the top
+        m.block.accept(this);  //block returns to the top
 
         currentMethod = null;
         
-        return null;
+        
         
     }
 
     @Override
-    public Object visit(ASVariable var) {   //returning description to fill up the arraylist in method desc.
+    public void visit(ASVariable var) {   //returning description to fill up the arraylist in method desc.
         VariableDescriptor des = new VariableDescriptor(var.type,var.name,var.line,var.column);
         
         if(current==top){
@@ -217,12 +217,12 @@ public class SemanticVisitor implements VisitorWithReturn{
         else{
             currentParameter = null;
         }
-        return null;
+        
 
     }
 
     @Override
-    public Object visit(ASArray array) {
+    public void visit(ASArray array) {
         
         //ERROR
         if(array.size == 0) {
@@ -233,11 +233,11 @@ public class SemanticVisitor implements VisitorWithReturn{
         ArrayDescriptor des = new ArrayDescriptor(array.type,array.name,array.size,array.line,array.column);
         checkDeclandPut(des.name, des, des.line, des.column);   
         array.typeIs = array.type;
-        return null;
+        
     }
     
     @Override
-    public Object visit(ASBlock block) {
+    public void visit(ASBlock block) {
         
         if(newMethod){ //no need to create a new environment
             newMethod = false;
@@ -250,28 +250,28 @@ public class SemanticVisitor implements VisitorWithReturn{
         //traverse the variables
         for(int i=0;i<block.var.size();i++){
             ASVariable var = block.var.get(i);
-            var.acceptWithReturn(this);
+            var.accept(this);
         }
         
         //traverse the statements
         for(int i=0;i<block.statements.size();i++){
             ASStatement f = block.statements.get(i);
-            f.acceptWithReturn(this);
+            f.accept(this);
         }
         
         exitScope();//end environment
         block.typeIs = new ASType("na");
         
-        return null;
+        
         
     }
 
     @Override
-    public Object visit(ASAssignment assign) {
+    public void visit(ASAssignment assign) {
         
         assign.location.isStore = true;
-        assign.location.acceptWithReturn(this);
-        assign.expr.acceptWithReturn(this);
+        assign.location.accept(this);
+        assign.expr.accept(this);
         
         ASType lhs = assign.location.typeIs;
         ASType rhs = assign.expr.typeIs;
@@ -312,11 +312,11 @@ public class SemanticVisitor implements VisitorWithReturn{
             
         }
         
-        return null;
+        
     }
 
     @Override
-    public Object visit(ASBreak b) {
+    public void visit(ASBreak b) {
         
         //ERROR
         if(!isFor){
@@ -328,11 +328,11 @@ public class SemanticVisitor implements VisitorWithReturn{
             b.typeIs = new ASType("na");
         }
         
-        return null;
+        
     }
 
     @Override
-    public Object visit(ASContinue c) {
+    public void visit(ASContinue c) {
         
         //ERROR
         if(!isFor){
@@ -345,11 +345,11 @@ public class SemanticVisitor implements VisitorWithReturn{
         }
         
         
-        return null;
+        
     }
 
     @Override
-    public Object visit(ASFor f) {
+    public void visit(ASFor f) {
         
         isFor = true;
         
@@ -361,8 +361,8 @@ public class SemanticVisitor implements VisitorWithReturn{
         des.kind = VariableDescriptor.LOCAL;
         checkDeclandPut(des.name, des, des.line, des.column);
         
-        f.startExpr.acceptWithReturn(this);
-        f.endExpr.acceptWithReturn(this);
+        f.startExpr.accept(this);
+        f.endExpr.accept(this);
         
         ASType start = f.startExpr.typeIs;
         ASType end = f.endExpr.typeIs;
@@ -375,20 +375,20 @@ public class SemanticVisitor implements VisitorWithReturn{
             noOfErrors++;
         }
         
-        f.block.acceptWithReturn(this);
+        f.block.accept(this);
         
         //exiting the scope
         exitScope();
         isFor = false;
         
-        return null;
+        
         
     }
 
     @Override
-    public Object visit(ASIf f) {
+    public void visit(ASIf f) {
         
-        f.condition.acceptWithReturn(this);
+        f.condition.accept(this);
         ASType t = f.condition.typeIs;
         
         //must be of boolean type
@@ -402,19 +402,19 @@ public class SemanticVisitor implements VisitorWithReturn{
             f.typeIs = f.condition.typeIs;
         }
         
-        f.ifstat.acceptWithReturn(this);
+        f.ifstat.accept(this);
         if(f.elsePresent){
-            f.elsestat.acceptWithReturn(this);
+            f.elsestat.accept(this);
         }
         
-        return null;
+        
         
     }
 
     
 
     @Override
-    public Object visit(ASReturn ret) {
+    public void visit(ASReturn ret) {
         if(currentMethod.returnValue.type == ASType.VOID){  // no expression needed
             //ERROR cannot return a value
             if(ret.returnExpr != null){
@@ -430,7 +430,7 @@ public class SemanticVisitor implements VisitorWithReturn{
                 noOfErrors++;
             }
             else{
-                ret.returnExpr.acceptWithReturn(this);
+                ret.returnExpr.accept(this);
                 ASType t = ret.returnExpr.typeIs;
                 if(checkType(t.type,currentMethod.returnValue.type)){
                     putErrorType(ret);
@@ -443,14 +443,14 @@ public class SemanticVisitor implements VisitorWithReturn{
             }
         }
         
-        return null;
+        
     }
     
     @Override
-    public Object visit(ASBinaryExpr ex) {
+    public void visit(ASBinaryExpr ex) {
         
-        ex.lhs.acceptWithReturn(this);
-        ex.rhs.acceptWithReturn(this);
+        ex.lhs.accept(this);
+        ex.rhs.accept(this);
         
         ASType lhs = ex.lhs.typeIs;
         ASType rhs = ex.rhs.typeIs;
@@ -506,14 +506,14 @@ public class SemanticVisitor implements VisitorWithReturn{
             }
         }
         
-        return null;
+        
         
         
     }
     
     @Override
-    public Object visit(ASUnaryExpr ex) {
-        ex.expr.acceptWithReturn(this);
+    public void visit(ASUnaryExpr ex) {
+        ex.expr.accept(this);
         ASType t = ex.expr.typeIs;
         if(ex.operator == ASUnaryExpr.MINUS){  //should be of type int
             //ERROR
@@ -538,30 +538,30 @@ public class SemanticVisitor implements VisitorWithReturn{
             }
         }
         
-        return null;
+        
     }
 
     @Override
-    public Object visit(ASBooleanLiteral b) {
+    public void visit(ASBooleanLiteral b) {
         b.typeIs = new ASType("boolean");  //characters are unsigned int (or part of integers)
-        return null;
+        
     }
 
     @Override
-    public Object visit(ASCharLiteral c) {
+    public void visit(ASCharLiteral c) {
         c.typeIs = new ASType("int");  //characters are unsigned int (or part of integers)
-        return null;
+        
     }
 
     @Override
-    public Object visit(ASIntLiteral i) {
+    public void visit(ASIntLiteral i) {
         i.typeIs = new ASType("int");
-        return null;
+        
     }
 
     //done
     @Override
-    public Object visit(ASLocationArray array) {
+    public void visit(ASLocationArray array) {
         
         Descriptor des = current.get(array.name);
 
@@ -580,7 +580,7 @@ public class SemanticVisitor implements VisitorWithReturn{
             }
             else{
                 ArrayDescriptor ades = (ArrayDescriptor)des;
-                array.location.acceptWithReturn(this);
+                array.location.accept(this);
                 //ERROR
                 if(checkType(array.location.typeIs.type,ASType.INT)){
                     putErrorType(array);
@@ -590,16 +590,23 @@ public class SemanticVisitor implements VisitorWithReturn{
                 else{
                     array.typeIs =  ades.type.element;
                 }
+                
+                if(array.isStore){
+                    array.store = new IRStore(ades);
+                }
+                else{
+                    array.load = new IRLoad(ades);
+                } 
             }
         }
             
         
-        return null;
+        
     }
 
     //done
     @Override
-    public Object visit(ASLocationVar var) {
+    public void visit(ASLocationVar var) {
         
         Descriptor des = current.get(var.name);
 
@@ -628,25 +635,25 @@ public class SemanticVisitor implements VisitorWithReturn{
             }
             
         }
-        return null;
+        
     }
     
     //done
     @Override
-    public Object visit(ASMethodCallS call) {
+    public void visit(ASMethodCallS call) {
         //can be a normal or a library call
-        call.method.acceptWithReturn(this);
+        call.method.accept(this);
         
         //no need to check the return value here
-        return null;
+        
     }
 
     //done
     @Override
-    public Object visit(ASMethodCallE call) {
+    public void visit(ASMethodCallE call) {
         
         //can be a normal or a library call
-        call.method.acceptWithReturn(this);
+        call.method.accept(this);
         
         //this should return a value
         //ERROR
@@ -663,26 +670,29 @@ public class SemanticVisitor implements VisitorWithReturn{
             
         }
         
-        return null;
+        
 
     }
 
     @Override
-    public Object visit(ASStringLiteral l) {
-        return null;
+    public void visit(ASStringLiteral l) {
+        
     }
 
    
 
     @Override
-    public Object visit(ASLibraryCall m) {
+    public void visit(ASLibraryCall m) {
         //no semantics - the type is not known; so not applicable
         m.typeIs = new ASType("na");
-        return null;
+        for(int i=0;i<m.arguments.size();i++){
+            m.arguments.get(i).accept(this);
+        }
+        
     }
 
     @Override
-    public Object visit(ASNormalCall asmethod) {
+    public void visit(ASNormalCall asmethod) {
         //first check whether the method exists
         Descriptor des = current.get(asmethod.name);
         //ERROR
@@ -698,7 +708,7 @@ public class SemanticVisitor implements VisitorWithReturn{
                 putErrorType(asmethod);
                 error.printNotMethodError(asmethod.name, asmethod.line, asmethod.column);
                 noOfErrors++; 
-                return null;
+                return;
             }
             
             MethodDescriptor mdes = (MethodDescriptor)des;
@@ -715,7 +725,7 @@ public class SemanticVisitor implements VisitorWithReturn{
                 //type check
                 for(int i=0;i<asmethod.arguments.size();i++){
                     ASExpr ex = asmethod.arguments.get(i);
-                    ex.acceptWithReturn(this);
+                    ex.accept(this);
                     ASType t = ex.typeIs;
                     //need the parameters in order
                     VariableDescriptor vdes = mdes.parameters.get(i);
@@ -731,7 +741,7 @@ public class SemanticVisitor implements VisitorWithReturn{
             asmethod.typeIs = mdes.returnValue;   
         }
         
-        return null;
+        
         
     }
  
