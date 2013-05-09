@@ -31,53 +31,75 @@ public class ASBinaryExpr extends ASExpr{
     public static final int NEQ     = 11;
     public static final int AND     = 12;
     public static final int OR      = 13;
+    public static final int ERROR   = 14;
 
     public ASBinaryExpr(String op, ASExpr lhs, ASExpr rhs) {
         
         this.lhs = lhs;
         this.rhs = rhs;
         this.stringop = op;
+        this.operator = getOperator(op);
+    }
+    
+    public static int getOperator(String op){
+        int retop;
         switch (op) {
             case "+":
-                this.operator = PLUS;
+                retop = PLUS;
                 break;
             case "-":
-                this.operator = MINUS;
+                retop = MINUS;
                 break;
             case "*":
-                this.operator = MULT;
+                retop = MULT;
                 break;
             case "/":
-                this.operator = DIV;
+                retop = DIV;
                 break;
             case "%":
-                this.operator = MOD;
+                retop = MOD;
                 break;
             case ">":
-                this.operator = GT;
+                retop = GT;
                 break;
             case ">=":
-                this.operator = GE;
+                retop = GE;
                 break;
             case "<":
-                this.operator = LT;
+                retop = LT;
                 break;
             case "<=":
-                this.operator = LE;
+                retop = LE;
                 break;
             case "==":
-                this.operator = EQ;
+                retop = EQ;
                 break;
             case "!=":
-                this.operator = NEQ;
+                retop = NEQ;
                 break;
             case "&&":
-                this.operator = AND;
+                retop = AND;
+                break;
+            case "||":
+                retop = OR;
                 break;
             default:
-                this.operator = OR;
+                retop = ERROR;
                 break;
         }
+        return retop;
+    }
+    
+    public static boolean isArithmetic(int op){
+        return op==PLUS || op==MINUS || op==MULT || op==DIV || op==MOD;
+    }
+    
+    public static boolean isConditional(int op){
+        return op==GE || op==GT || op==LE || op==LT || op==EQ || op==NEQ;
+    }
+    
+    public static boolean isRelational(int op){
+        return op==AND || op==OR;
     }
     
     public ASBinaryExpr(String op, ASExpr lhs, ASExpr rhs, int line, int col){

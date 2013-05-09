@@ -3,9 +3,13 @@ package decaf;
 import java.io.*;
 import antlr.*;
 import ast.ASProgram;
+import codegen.CodeGen;
+import ir.low.IRLContainer;
 import java6035.tools.CLI.*;
 import semantic.ASTPrinter;
+import semantic.IRLGenerator;
 import semantic.IRPrinter;
+import semantic.SemException;
 import semantic.SemanticVisitor;
 import semantic.SymbolTablePrinter;
 
@@ -94,6 +98,7 @@ class Main {
                                 System.out.println("\n***************IR*******************");
                                 p.accept(new IRPrinter(),0);
                             }
+
                         }
                         System.exit(0);
                         } catch(Exception e) {
@@ -103,6 +108,44 @@ class Main {
                             
                         }
         	}
+                else if(CLI.target == CLI.ASSEMBLY){
+                    try{
+        		DecafScanner lexer = new DecafScanner(new DataInputStream(inputStream));
+        		DecafParser parser = new DecafParser (lexer);
+                        ASProgram p = parser.program();
+                        
+                            
+                            String name = CLI.infile;
+                            File f = new File(name);
+                            
+                            SemanticVisitor v = new SemanticVisitor(f.getName(),true);
+                            p.accept(v);
+                            if(v.noOfErrors!=0){
+                                throw new SemException();
+                            }
+                            
+                            IRLGenerator irg = new IRLGenerator(v.top);
+                            p.accept(irg);
+                            //get the container of the low level IR out
+                            IRLContainer ircon = irg.currentContainer;
+                            //generate code
+                            CodeGen gen = new CodeGen(ircon,"out.s");
+                            //build the IR remaining parts
+                            gen.buildIRL();
+                            //generate the assembly codes
+                            gen.generateCode();
+                            
+                            if(CLI.debug){
+                                //yet to decide
+                            }
+                            System.exit(0);
+                        } catch(Exception e) {
+                            System.out.println(e);
+                            //System.exit(1);
+                            throw e;
+                            
+                        }
+                }
                 
         	
         } catch(Exception e) {

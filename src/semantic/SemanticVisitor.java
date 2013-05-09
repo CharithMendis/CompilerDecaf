@@ -53,6 +53,7 @@ import semantic.symbol.VariableDescriptor;
 //field and method cannot have the same name = this can be remedied in next stages.
 
 //need to check return statement
+//need to check for integer ranges
 //error - means it is being dealt somewhere / NA - means a callout give a warning
 
 public class SemanticVisitor implements Visitor{
@@ -311,8 +312,6 @@ public class SemanticVisitor implements Visitor{
             }
             
         }
-        
-        
     }
 
     @Override
@@ -343,9 +342,7 @@ public class SemanticVisitor implements Visitor{
         else{
             c.typeIs = new ASType("na");
         }
-        
-        
-        
+
     }
 
     @Override
@@ -380,9 +377,6 @@ public class SemanticVisitor implements Visitor{
         //exiting the scope
         exitScope();
         isFor = false;
-        
-        
-        
     }
 
     @Override
@@ -406,12 +400,7 @@ public class SemanticVisitor implements Visitor{
         if(f.elsePresent){
             f.elsestat.accept(this);
         }
-        
-        
-        
     }
-
-    
 
     @Override
     public void visit(ASReturn ret) {
