@@ -35,11 +35,11 @@ public class CGTranslate {
         return "\tmovl " + src + ", " + dest + "\n";
     }
     
-    public String addSubCode(String op,String src,String dest){
+    public String addSubMulCode(String op,String src,String dest){
         return "\t" + getArithmeticCommands(op) + " " + src + ", " + dest + "\n";
     }
     
-    public String mulDivCode(String op,String src){
+    public String divModCode(String op,String src){
         return "\t" + getArithmeticCommands(op) + " " + src + "\n";
     }
     

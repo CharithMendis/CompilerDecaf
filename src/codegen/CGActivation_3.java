@@ -220,19 +220,23 @@ public class CGActivation_3 implements VisitorIR{
         String s1 = (String)ar.lhs.accept(this, o);
         String s2 = (String)ar.rhs.accept(this, o);
         //cannot have true or false statements
-        if(ar.stringop.equals("+") || ar.stringop.equals("-")){
+        if(ar.stringop.equals("+") || ar.stringop.equals("-") || ar.stringop.equals("*")){
             append(trans.movCode(s1, EBX));
-            append(trans.addSubCode(ar.stringop, s2, EBX));
+            append(trans.addSubMulCode(ar.stringop, s2, EBX));
             append(trans.pushCode(EBX));
         }
-        else if(ar.stringop.equals("*") || ar.stringop.equals("/")){
+        else if(ar.stringop.equals("/")){
             append(trans.movCode(s1, EAX));
-            append(trans.mulDivCode(ar.stringop, s2));
+            append("\tcdq\n");                   //extend to quad word
+            append(trans.movCode(s2, EBX));
+            append(trans.divModCode(ar.stringop, EBX));
             append(trans.pushCode(EAX));
         }
         else{
             append(trans.movCode(s1, EAX));
-            append(trans.mulDivCode(ar.stringop, s2));
+            append("\tcdq\n");
+            append(trans.movCode(s2, EBX));
+            append(trans.divModCode(ar.stringop, EBX));
             append(trans.pushCode(EDX));
         }
         
