@@ -94,7 +94,7 @@ public class IRPrinter implements VisitorWithPara{
     public void visit(ASFor f, int t) {
         keepTab(t);
         System.out.println("for:");
-        //accept(f.var, t, this);
+        accept(f.var, t, this);
         keepTab(t);
         System.out.println("start: ");
         accept(f.startExpr, t, this);

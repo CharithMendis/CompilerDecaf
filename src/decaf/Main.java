@@ -125,13 +125,16 @@ class Main {
                             }
                             
                             IRLGenerator irg = new IRLGenerator(v.top);
-                            p.accept(irg);
+                            p.acceptWithReturn(irg);
                             //get the container of the low level IR out
                             IRLContainer ircon = irg.currentContainer;
                             //generate code
                             CodeGen gen = new CodeGen(ircon,"out.s");
+                            
                             //build the IR remaining parts
                             gen.buildIRL();
+                            //print it
+                            gen.printIRL();
                             //generate the assembly codes
                             gen.generateCode();
                             

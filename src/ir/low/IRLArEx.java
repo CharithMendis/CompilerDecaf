@@ -4,6 +4,8 @@
  */
 package ir.low;
 
+import codegen.VisitorIR;
+
 /**
  *
  * @author Charith
@@ -14,6 +16,8 @@ public class IRLArEx extends IRLBinaryEx{
         super(stringop, lhs, rhs);
     }
     
-    
+    public Object accept(VisitorIR v,Object o) throws Exception{
+        return v.visit(this,o);
+    }
     
 }

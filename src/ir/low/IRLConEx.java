@@ -5,6 +5,7 @@
 package ir.low;
 
 import ast.ASBinaryExpr;
+import codegen.VisitorIR;
 
 /**
  *
@@ -19,4 +20,7 @@ public class IRLConEx extends IRLBinaryEx{
         super(stringop, lhs, rhs);
     }
     
+    public Object accept(VisitorIR v,Object o) throws Exception{
+        return v.visit(this,o);
+    }
 }

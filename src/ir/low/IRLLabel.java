@@ -4,6 +4,8 @@
  */
 package ir.low;
 
+import codegen.VisitorIR;
+
 /**
  *
  * @author Charith
@@ -19,6 +21,8 @@ public class IRLLabel extends IRLEx{
     public IRLLabel() {
     }
     
-    
+    public Object accept(VisitorIR v,Object o) throws Exception{
+        return v.visit(this,o);
+    }
     
 }

@@ -27,11 +27,14 @@ import ast.ASReturn;
 import ast.ASStringLiteral;
 import ast.ASUnaryExpr;
 import ast.ASVariable;
+import ir.low.CALL;
 import ir.low.CJUMP;
 import ir.low.CONST;
 import ir.low.IRLActivation;
 import ir.low.IRLArEx;
 import ir.low.IRLBinaryEx;
+import ir.low.IRLCallE;
+import ir.low.IRLCallS;
 import ir.low.IRLConEx;
 import ir.low.IRLContainer;
 import ir.low.IRLEx;
@@ -43,6 +46,8 @@ import ir.low.IRLStm;
 import ir.low.IRLTemp;
 import ir.low.JUMP;
 import ir.low.MOV;
+import ir.low.NEG;
+import ir.low.STRING;
 import java.util.Stack;
 import semantic.symbol.ArrayDescriptor;
 import semantic.symbol.Environment;
@@ -221,10 +226,7 @@ public class IRLGenerator implements VisitorWithReturn{
         
     }
 
-    @Override
-    public Object visit(ASMethodCallS call) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+    
 
     @Override
     public Object visit(ASReturn ret) {
@@ -272,6 +274,17 @@ public class IRLGenerator implements VisitorWithReturn{
             return new IRLRelEx(ex.stringop, lhs, null);
         }
     }
+    
+    @Override
+    public Object visit(ASUnaryExpr ex) {
+        IRLEx irlex = (IRLEx)ex.expr.acceptWithReturn(this);
+        if(ex.operator == ASUnaryExpr.MINUS){
+            return new IRLArEx("-", new CONST(0), irlex);
+        }
+        else{
+            return new NEG(irlex);
+        }
+    }
 
     @Override
     public Object visit(ASBooleanLiteral b) {
@@ -301,6 +314,7 @@ public class IRLGenerator implements VisitorWithReturn{
 
     @Override
     public Object visit(ASLocationVar var) {
+        
         if(var.isStore){
             return new IRLMemLoc(var.store.fdes);
         }
@@ -309,29 +323,52 @@ public class IRLGenerator implements VisitorWithReturn{
         }
     }
 
+    
+    @Override
+    public Object visit(ASMethodCallS call) {
+        
+        CALL r = (CALL)call.method.acceptWithReturn(this);
+        IRLCallS calls = new IRLCallS(r);
+        makeCurStm(calls);
+        
+        return null;
+    }
+    
     @Override
     public Object visit(ASMethodCallE call) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        
+        CALL r = (CALL)call.method.acceptWithReturn(this);
+        IRLCallE calle = new IRLCallE(r);
+        return calle;
     }
 
     @Override
     public Object visit(ASStringLiteral l) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public Object visit(ASUnaryExpr ex) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return new STRING(new IRLLabel(),l.argument);
     }
 
     @Override
     public Object visit(ASLibraryCall m) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        
+        String[] split = m.name.split("\"");
+        
+        CALL call = new CALL(new IRLLabel("_" + split[1]));
+        for(int i=0;i<m.arguments.size();i++){
+            IRLEx ex = (IRLEx)m.arguments.get(i).acceptWithReturn(this);
+            call.addArgument(ex);
+        }
+        return call;
+        
     }
 
     @Override
-    public Object visit(ASNormalCall l) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public Object visit(ASNormalCall m) {
+        CALL call = new CALL(new IRLLabel("_" + m.name));
+        for(int i=0;i<m.arguments.size();i++){
+            IRLEx ex = (IRLEx)m.arguments.get(i).acceptWithReturn(this);
+            call.addArgument(ex);
+        }
+        return call;
     }
 
     @Override

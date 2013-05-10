@@ -11,7 +11,7 @@ package ir.low;
 public abstract class IRLStm extends IRL{
     
     public IRLStm next = null;
-    public IRLStm prev;
+    //public IRLStm prev;
     
     
     public IRLLabel own = null;

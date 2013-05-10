@@ -4,6 +4,7 @@
  */
 package ir.low;
 
+import codegen.VisitorIR;
 import semantic.symbol.FieldDescriptor;
 
 /**
@@ -12,7 +13,7 @@ import semantic.symbol.FieldDescriptor;
  */
 public class IRLMemLoc extends IRLEx{
     
-    public IRLEx expr;  //this is null for normal variables
+    public IRLEx expr;  //this is null for normal variables only for array variables
     public FieldDescriptor fdes;
     
     
@@ -28,7 +29,9 @@ public class IRLMemLoc extends IRLEx{
     }
     
     
-    
+    public Object accept(VisitorIR v,Object o) throws Exception{
+        return v.visit(this,o);
+    }
     
     
 }

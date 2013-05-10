@@ -4,6 +4,8 @@
  */
 package ir.low;
 
+import codegen.VisitorIR;
+
 /**
  *
  * @author Charith
@@ -26,6 +28,8 @@ public class CJUMP extends IRLStm{
         own = null;
     }
     
-    
+    public Object accept(VisitorIR v,Object o) throws Exception{
+        return v.visit(this,o);
+    }
     
 }

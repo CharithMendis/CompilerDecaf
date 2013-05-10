@@ -5,9 +5,11 @@
 package codegen;
 
 import ir.low.IRLContainer;
+import ir.low.STRING;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -20,12 +22,23 @@ public class CodeGen {
     
     IRLContainer container;
     BufferedWriter buf;
+    
+    //globals for code generation
+    ArrayList<STRING> strings;
 
     public CodeGen(IRLContainer container,String name) {
         this.container = container;
-        buf = null;
         try {
             buf = new BufferedWriter(new FileWriter(name));
+        } catch (Exception ex) {
+            Logger.getLogger(CodeGen.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    //print
+    public void printIRL(){
+        try {
+            container.accept(new IRLPrinter(), null);
         } catch (Exception ex) {
             Logger.getLogger(CodeGen.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -33,7 +46,21 @@ public class CodeGen {
 
     //IRL passes
     public void buildIRL(){
-        
+        try {
+            //string labeling
+            IRStringLabel_1 irs = new IRStringLabel_1();
+            container.accept(irs, null);
+            strings = irs.getStringList();
+            //parameter and local labeling
+            IRVariableAllocator_2 irv = new  IRVariableAllocator_2(container);
+            irv.traverse();
+            //labels
+            container.accept(new IRLabelAllocator_3(), null);
+            
+            
+        } catch (Exception ex) {
+            Logger.getLogger(CodeGen.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
     //actual code printing
@@ -42,7 +69,10 @@ public class CodeGen {
             
             
             //generate the global variable code
-            container.accept(new CGGlobalDecl_1(buf));
+            container.accept(new CGGlobalDecl_1(buf),null);
+            buf.newLine();
+            //generate strings
+            (new CGString_2(buf,strings)).print();
             
 
         } catch (Exception ex) {

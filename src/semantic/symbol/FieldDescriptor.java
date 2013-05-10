@@ -5,6 +5,7 @@
 package semantic.symbol;
 
 import ast.ASType;
+import ir.low.IRLTemp;
 
 /**
  *
@@ -13,5 +14,6 @@ import ast.ASType;
 public abstract class FieldDescriptor extends Descriptor{
     
     public ASType type;
+    public IRLTemp loc; //this stores the location of the field descriptor
     
 }

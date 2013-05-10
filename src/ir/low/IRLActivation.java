@@ -4,6 +4,7 @@
  */
 package ir.low;
 
+import codegen.VisitorIR;
 import semantic.symbol.Environment;
 import semantic.symbol.MethodDescriptor;
 
@@ -27,6 +28,8 @@ public class IRLActivation extends IRL{
         this.head = new IRLTerStm();
     }
     
-    
+    public Object accept(VisitorIR v,Object o) throws Exception{
+        return v.visit(this,o);
+    }
     
 }

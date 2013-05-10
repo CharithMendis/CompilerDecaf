@@ -4,6 +4,8 @@
  */
 package ir.low;
 
+import codegen.VisitorIR;
+
 /**
  *
  * @author Charith
@@ -16,6 +18,8 @@ public class IRLReturn extends IRLStm{
         this.mov = mov;
     }
     
-    
+    public Object accept(VisitorIR v,Object o) throws Exception{
+        return v.visit(this,o);
+    }
     
 }

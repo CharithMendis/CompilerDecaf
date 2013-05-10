@@ -5,6 +5,7 @@
 package semantic.symbol;
 
 import ast.ASType;
+import ir.low.IRLTemp;
 
 /**
  *
@@ -12,7 +13,7 @@ import ast.ASType;
  */
 public class VariableDescriptor extends FieldDescriptor{
     
-    public int kind;
+    public int kind;   //where is this used????? - in the method local size allocation (parameters are already caller assigned)
     
     public static final int FIELD = 1;
     public static final int PARA  = 2;

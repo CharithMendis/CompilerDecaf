@@ -8,6 +8,6 @@ package codegen;
  *
  * @author Charith
  */
-public class CGActivation_2 {
+public class CGActivation_3 {
     
 }

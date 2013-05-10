@@ -10,11 +10,13 @@ import codegen.VisitorIR;
  *
  * @author Charith
  */
-public class IRLRelEx extends IRLBinaryEx{
+public class NEG extends IRLEx{
     
-    
-    public IRLRelEx(String stringop, IRLEx lhs, IRLEx rhs) {
-        super(stringop, lhs, rhs);
+    public IRLEx ex;
+    public IRLTemp loc;
+
+    public NEG(IRLEx ex) {
+        this.ex = ex;
     }
     
     public Object accept(VisitorIR v,Object o) throws Exception{

@@ -12,7 +12,7 @@ import ast.ASBinaryExpr;
  */
 public abstract class IRLBinaryEx extends IRLEx{
     
-    public IRLTemp loc;
+    
     public String stringop;
     public int operator;
     public IRLEx lhs;
@@ -23,7 +23,7 @@ public abstract class IRLBinaryEx extends IRLEx{
         this.lhs = lhs;
         this.rhs = rhs;
         this.operator = ASBinaryExpr.getOperator(stringop);
-        this.loc = new IRLTemp();
+        this.location = new IRLTemp();
     }
     
     

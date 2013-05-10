@@ -15,7 +15,7 @@ import semantic.symbol.FieldDescriptor;
  */
 public class IRLContainer extends IRL{
     
-    Environment top;
+    public Environment top;
     ArrayList<FieldDescriptor> fields;
     ArrayList<IRLActivation> activations;
 
@@ -37,6 +37,15 @@ public class IRLContainer extends IRL{
         return activations.size();
     }
     
+    public IRLActivation getActivation(String val){
+        for(int i=0;i<activations.size();i++){
+            if(activations.get(i).name.name.equals("_" + val)){
+                return activations.get(i);
+            }
+        }
+        return null;
+    } 
+    
     public void addField(FieldDescriptor f){
         fields.add(f);
     }
@@ -50,8 +59,8 @@ public class IRLContainer extends IRL{
     }
     
     
-    public void accept(VisitorIR v) throws Exception{
-        v.visit(this);
+    public Object accept(VisitorIR v,Object o) throws Exception{
+        return v.visit(this,o);
     }
     
     

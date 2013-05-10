@@ -347,7 +347,7 @@ public class SemanticVisitor implements Visitor{
 
     @Override
     public void visit(ASFor f) {
-        
+
         isFor = true;
         
         //entering a new scope
@@ -357,6 +357,8 @@ public class SemanticVisitor implements Visitor{
         VariableDescriptor des = new VariableDescriptor(new ASType("int"), f.var.name, f.line, f.column);
         des.kind = VariableDescriptor.LOCAL;
         checkDeclandPut(des.name, des, des.line, des.column);
+        
+        f.var.accept(this);
         
         f.startExpr.accept(this);
         f.endExpr.accept(this);

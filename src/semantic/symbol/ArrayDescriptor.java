@@ -5,6 +5,7 @@
 package semantic.symbol;
 
 import ast.ASType;
+import ir.low.IRLTemp;
 
 /**
  *
