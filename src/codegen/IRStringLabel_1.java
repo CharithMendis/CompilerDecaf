@@ -101,10 +101,7 @@ public class IRStringLabel_1 implements VisitorIR{
         }
         
         cjump.ex.accept(this, o);
-        
-        if(cjump.t != null){         //false or true labels may be there
-            cjump.t.accept(this, o);
-        }
+
         
         cjump.nextT.accept(this, o);   //this is a trm stm - may have other statements
         

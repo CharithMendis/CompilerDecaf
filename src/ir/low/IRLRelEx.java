@@ -13,8 +13,13 @@ import codegen.VisitorIR;
 public class IRLRelEx extends IRLBinaryEx{
     
     
+    public boolean isStored;
+    
+    
+    
     public IRLRelEx(String stringop, IRLEx lhs, IRLEx rhs) {
         super(stringop, lhs, rhs);
+        isStored = false;
     }
     
     public Object accept(VisitorIR v,Object o) throws Exception{

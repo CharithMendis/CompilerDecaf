@@ -131,6 +131,15 @@ public class IRLGenerator implements VisitorWithReturn{
         
         IRLEx lhs = (IRLEx)assign.location.acceptWithReturn(this); 
         IRLEx rhs = (IRLEx)assign.expr.acceptWithReturn(this);
+        
+        //this is to assert the values that should be stored for this assignment
+        if(rhs.getClass()==IRLConEx.class){
+            ((IRLConEx)rhs).isStored = true;
+        }
+        else if(rhs.getClass()==IRLRelEx.class){
+            ((IRLRelEx)rhs).isStored = true;
+        }
+        
         if(assign.operator != ASAssignment.ASSIGN){
             lhs = new IRLArEx(assign.stringop.substring(0,1),
                     rhs,
@@ -163,26 +172,27 @@ public class IRLGenerator implements VisitorWithReturn{
         ASAssignment as = new ASAssignment("=",f.var, f.startExpr);
         as.acceptWithReturn(this);
         
-        MOV mov = new MOV(new IRLTemp(),(IRLEx)f.endExpr.acceptWithReturn(this));
-        
-        makeCurStm(mov);
-        
         //cjump
         IRLLabel falseLabel = new IRLLabel();
-        CJUMP cjump = new CJUMP(new IRLConEx("<=",(IRLEx)f.var.acceptWithReturn(this), mov.to), 
-                null, falseLabel);
+        
+        IRLConEx ircon = new IRLConEx("<=",(IRLEx)f.var.acceptWithReturn(this), (IRLEx)f.endExpr.acceptWithReturn(this)); 
+        ircon.falseEx = falseLabel;
+        ircon.trueEx = null;
+        
+        CJUMP cjump = new CJUMP(ircon, falseLabel);
         cjump.own = new IRLLabel();
         
-        breakJump.push(new JUMP(falseLabel));
         
-        //incrementing
+        //incrementing - can be optimized
         MOV inc = new MOV((IRLEx)f.var.acceptWithReturn(this),
                 new IRLArEx("+",(IRLEx)f.var.acceptWithReturn(this), new CONST(1)));
         inc.own = new IRLLabel();
         
+        breakJump.push(new JUMP(falseLabel));
         contJump.push(new JUMP(inc.own));
         
         makeCurStm(cjump);
+        
         currentStm = cjump.nextT;
         f.block.acceptWithReturn(this);
         
@@ -200,7 +210,6 @@ public class IRLGenerator implements VisitorWithReturn{
         breakJump.pop();
         contJump.pop();
         
-        
         return null;
         
         
@@ -210,8 +219,13 @@ public class IRLGenerator implements VisitorWithReturn{
     public Object visit(ASIf f) {
         
         IRLEx ifex = (IRLEx)f.condition.acceptWithReturn(this);
-        CJUMP cjump = new CJUMP(ifex, new IRLLabel(), new IRLLabel());
-        currentStm.next = cjump;
+ 
+        CJUMP cjump = new CJUMP(ifex, new IRLLabel());
+
+        ifex.falseEx = cjump.f;
+        ifex.trueEx = null;
+        
+        makeCurStm(cjump);
         
         currentStm = cjump.nextT;
         f.ifstat.acceptWithReturn(this);
@@ -255,22 +269,26 @@ public class IRLGenerator implements VisitorWithReturn{
             return new IRLConEx(ex.stringop,lhs,rhs);
         }
         else{
+            
             IRLEx lhs = (IRLEx)ex.lhs.acceptWithReturn(this);
             IRLEx rhs = (IRLEx)ex.rhs.acceptWithReturn(this);
+            
             IRLLabel t = new IRLLabel();
             IRLLabel f = new IRLLabel();
+            
             if(ex.operator == ASBinaryExpr.AND){
                 lhs.falseEx = f;
                 lhs.trueEx = rhs;
                 rhs.falseEx = f;
-                rhs.trueEx = t;
+                rhs.trueEx = null;
             }
             else{
                 lhs.falseEx = rhs;
                 lhs.trueEx = t;
-                rhs.falseEx = f;
+                rhs.falseEx = null;
                 rhs.trueEx = t;
             }  
+            
             return new IRLRelEx(ex.stringop, lhs, null);
         }
     }
@@ -282,6 +300,12 @@ public class IRLGenerator implements VisitorWithReturn{
             return new IRLArEx("-", new CONST(0), irlex);
         }
         else{
+            if(irlex.getClass()==IRLConEx.class){
+                ((IRLConEx)irlex).isStored = true;
+            }
+            else if(irlex.getClass()==IRLRelEx.class){
+                ((IRLRelEx)irlex).isStored = true;
+            }
             return new NEG(irlex);
         }
     }

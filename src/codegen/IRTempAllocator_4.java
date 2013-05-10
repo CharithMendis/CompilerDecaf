@@ -41,7 +41,7 @@ import semantic.symbol.FieldDescriptor;
 public class IRTempAllocator_4 implements VisitorIR{
     
     
-    int tempCounter = 0;
+    int tempCounter;
     
     //statements should visit next statement
     Object visitNext(IRLStm stm,Object o) throws Exception{
@@ -98,10 +98,7 @@ public class IRTempAllocator_4 implements VisitorIR{
         }
         
         cjump.ex.accept(this, o);
-        
-        if(cjump.t != null){         //false or true labels may be there
-            cjump.t.accept(this, o);
-        }
+
         
         cjump.nextT.accept(this, o);   //this is a trm stm - may have other statements
         

@@ -95,33 +95,21 @@ public class IRLabelAllocator_3 implements VisitorIR{
     @Override
     public Object visit(CJUMP cjump, Object o) throws Exception {
         
-        if(cjump.own != null){       //sometimes may have own label - in future we can have all cjumps have there own label
-            
-            cjump.own.name = getLabel();
+        if(cjump.own != null){       //sometimes may have own label - in future we can have all cjumps have there own label 
             cjump.own.accept(this, o);
         }
         
         cjump.ex.accept(this, o);
-        if(cjump.t != null){         //false or true labels may be there
-            
-            cjump.t.name = getLabel();
-            cjump.t.accept(this, o);
-        }
         
         cjump.nextT.accept(this, o);   //this is a trm stm - may have other statements
         
         if(cjump.f != null){          //false or true labels may be there
-            
-            cjump.f.name = getLabel();
             cjump.f.accept(this, o);
         }
-        
-        
-        
+
         cjump.nextF.accept(this, o);  //this is a trm stm - may have other statements
         visitNext(cjump, o);
-        
-        
+
         
         return null;
     }
@@ -153,7 +141,6 @@ public class IRLabelAllocator_3 implements VisitorIR{
     @Override
     public Object visit(MOV mov, Object o) throws Exception {
         if(mov.own != null){
-            mov.own.name = getLabel();
             mov.own.accept(this, o);
         }
         mov.from.accept(this, o);

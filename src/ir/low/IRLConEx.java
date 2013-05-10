@@ -14,10 +14,11 @@ import codegen.VisitorIR;
 public class IRLConEx extends IRLBinaryEx{
     
     public int associated;    
-    
+    public boolean isStored;
 
     public IRLConEx(String stringop, IRLEx lhs, IRLEx rhs) {
         super(stringop, lhs, rhs);
+        isStored = false;
     }
     
     public Object accept(VisitorIR v,Object o) throws Exception{
