@@ -47,4 +47,8 @@ public class CGTranslate {
         return "\tpush " + dest + "\n";
     }
     
+    public String callCode(String label){
+        return "\tcall " + label + "\n";
+    }
+    
 }

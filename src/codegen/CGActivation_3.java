@@ -46,6 +46,8 @@ public class CGActivation_3 implements VisitorIR{
     public final String EBX = "%ebx";
     public final String ECX = "%ecx";
     public final String EDX = "%edx";
+    public final String ESP = "%esp";
+    public final String EBP = "%ebp";
     
 
     public CGActivation_3(BufferedWriter buf) {
@@ -94,7 +96,6 @@ public class CGActivation_3 implements VisitorIR{
         
         for(int i=0;i<ir.getActivationCount();i++){
             ir.getActivation(i).accept(this, o);
-            buf.write("\tleave\n\tret\n\n");   //to be safe that a return is there
         }
         return null;
     }
@@ -107,9 +108,14 @@ public class CGActivation_3 implements VisitorIR{
         
         append("\tenter $" + String.valueOf(act.localSize*4) + ", $0\n");
         
+        //save the callee save registers - change code in the temp allocation to imclude these register counts
+         
         buf.write(currentString);
-        
+
         act.head.accept(this, o);
+        
+        //restore the callee saved registers
+        buf.write("\tleave\n\tret\n\n");   //to be safe that a return is there
         
         return null;
     }
@@ -185,17 +191,32 @@ public class CGActivation_3 implements VisitorIR{
     
     @Override
     public Object visit(IRLCallS calls, Object o) throws Exception {
+        
+        currentString = calls.code;
+        
         calls.call.accept(this, o);
+        
+        append(trans.addSubMulCode("+","$" + String.valueOf(calls.call.arguments.size()*4), ESP));   //remove parameters
+        
+        //pop the caller saved registers
+        
+        buf.write(currentString);
+        
         visitNext(calls,0);
         return null;
     }
 
     @Override
     public Object visit(CALL call, Object o) throws Exception {
-        call.name.accept(this, o);
-        for(int i=0;i<call.arguments.size();i++){
-            call.getArgument(i).accept(this, o);
+        
+        //first store the caller saved registers
+        
+        for(int i=call.arguments.size()-1;i>=0;i--){  //arguments go the other way around
+           String s  = (String)call.getArgument(i).accept(this, o);
+           append(trans.pushCode(s)); //push the parameters
         }
+        
+        append(trans.callCode(call.name.name));  //call the function
         return null;
        
     }
@@ -280,8 +301,8 @@ public class CGActivation_3 implements VisitorIR{
 
     @Override
     public Object visit(STRING string, Object o) throws Exception {
-        string.label.accept(this, o);
-        return null;
+        return "$" + string.label.name;
+        
     }
 
     @Override
