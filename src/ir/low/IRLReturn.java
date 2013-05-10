@@ -12,10 +12,10 @@ import codegen.VisitorIR;
  */
 public class IRLReturn extends IRLStm{
     
-    public MOV mov;
+    public IRLEx ex;
 
-    public IRLReturn(MOV mov) {
-        this.mov = mov;
+    public IRLReturn(IRLEx ex) {
+        this.ex = ex;
     }
     
     public Object accept(VisitorIR v,Object o) throws Exception{

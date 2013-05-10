@@ -123,8 +123,8 @@ public class IRLPrinter implements VisitorIR{
     @Override
     public Object visit(IRLReturn ret, Object o) throws Exception {
         System.out.println("Return: ");
-        if(ret.mov!=null){
-            ret.mov.accept(this, o);
+        if(ret.ex!=null){
+            ret.ex.accept(this, o);
         }
         visitNext(ret, o);
         

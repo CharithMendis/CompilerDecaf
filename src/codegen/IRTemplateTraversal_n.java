@@ -104,8 +104,8 @@ public class IRTemplateTraversal_n implements VisitorIR{
 
     @Override
     public Object visit(IRLReturn ret, Object o) throws Exception {
-        if(ret.mov!=null){
-            ret.mov.accept(this, o);
+        if(ret.ex!=null){
+            ret.ex.accept(this, o);
         }
         visitNext(ret, o);
         

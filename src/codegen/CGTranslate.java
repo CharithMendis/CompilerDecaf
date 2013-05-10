@@ -51,4 +51,8 @@ public class CGTranslate {
         return "\tcall " + label + "\n";
     }
     
+    public String returnCode(){
+        return "\tleave\n\tret\n";
+    }
+    
 }

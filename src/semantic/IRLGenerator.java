@@ -247,7 +247,17 @@ public class IRLGenerator implements VisitorWithReturn{
     public Object visit(ASReturn ret) {
         IRLReturn r;
         if(ret.returnExpr!= null){
-            r = new IRLReturn(new MOV(new IRLTemp(),(IRLEx)ret.returnExpr.acceptWithReturn(this)));
+            
+            IRLEx irlex = (IRLEx)ret.returnExpr.acceptWithReturn(this);
+            if(irlex.getClass()==IRLConEx.class){
+                ((IRLConEx)irlex).isStored = true;
+            }
+            else if(irlex.getClass()==IRLRelEx.class){
+                ((IRLRelEx)irlex).isStored = true;
+            }
+            
+            r = new IRLReturn(irlex);
+            
         }
         else{
             r = new IRLReturn(null);

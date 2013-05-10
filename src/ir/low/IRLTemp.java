@@ -10,7 +10,7 @@ import codegen.VisitorIR;
  *
  * @author Charith
  */
-public class IRLTemp extends IRLEx{
+public class IRLTemp {
     
     
     public static final int REGCNT = 8;

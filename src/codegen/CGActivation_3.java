@@ -6,6 +6,7 @@ package codegen;
 
 
 import ast.ASBinaryExpr;
+import ast.ASType;
 import ir.low.CALL;
 import ir.low.CJUMP;
 import ir.low.CONST;
@@ -115,7 +116,9 @@ public class CGActivation_3 implements VisitorIR{
         act.head.accept(this, o);
         
         //restore the callee saved registers
-        buf.write("\tleave\n\tret\n\n");   //to be safe that a return is there
+        if(act.mdes.returnValue.type == ASType.VOID){
+            buf.write("\tleave\n\tret\n\n");   //to be safe that a return is there
+        }
         
         return null;
     }
@@ -146,9 +149,17 @@ public class CGActivation_3 implements VisitorIR{
 
     @Override
     public Object visit(IRLReturn ret, Object o) throws Exception {
-        if(ret.mov!=null){
-            ret.mov.accept(this, o);
+        
+        currentString = ret.code;
+        
+        if(ret.ex!=null){
+           String s = (String)ret.ex.accept(this, o);
+           append(trans.movCode(s, EAX));
         }
+        append(trans.returnCode());
+        
+        buf.write(currentString);
+        
         visitNext(ret, o);
         
         return null;
@@ -223,9 +234,16 @@ public class CGActivation_3 implements VisitorIR{
 
     @Override
     public Object visit(IRLCallE calle, Object o) throws Exception {
+        
         calle.call.accept(this, o);
+        
+        append(trans.addSubMulCode("+","$" + String.valueOf(calle.call.arguments.size()*4), ESP));   //remove parameters
+        append(trans.pushCode(EAX));
+        
+        //pop the caller saved registers
         visitEx(calle);
-        return null;
+        
+        return calle.location.getRegister();
     }
 
     @Override
