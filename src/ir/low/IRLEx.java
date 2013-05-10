@@ -16,6 +16,6 @@ public abstract class IRLEx extends IRL{
     
     
     //temporary for storing values
-    public IRLTemp location;
+    public IRLTemp location = null;
     
 }

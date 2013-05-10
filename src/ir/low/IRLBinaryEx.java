@@ -23,7 +23,7 @@ public abstract class IRLBinaryEx extends IRLEx{
         this.lhs = lhs;
         this.rhs = rhs;
         this.operator = ASBinaryExpr.getOperator(stringop);
-        this.location = new IRLTemp();
+
     }
     
     

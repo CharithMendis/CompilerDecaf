@@ -11,9 +11,9 @@ package ir.low;
 public abstract class IRLStm extends IRL{
     
     public IRLStm next = null;
-    //public IRLStm prev;
-    
-    
     public IRLLabel own = null;
+    
+    //this is to contain the statements that are going to be in the code
+    public String code = "";
     
 }

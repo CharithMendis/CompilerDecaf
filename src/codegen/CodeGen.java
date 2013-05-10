@@ -56,6 +56,8 @@ public class CodeGen {
             irv.traverse();
             //labels
             container.accept(new IRLabelAllocator_3(), null);
+            //temps
+            container.accept(new IRTempAllocator_4(), null);
             
             
         } catch (Exception ex) {
@@ -73,6 +75,9 @@ public class CodeGen {
             buf.newLine();
             //generate strings
             (new CGString_2(buf,strings)).print();
+            //generate the strings of final code
+            container.accept(new CGActivation_3(buf), null);
+            //generate the file output
             
 
         } catch (Exception ex) {

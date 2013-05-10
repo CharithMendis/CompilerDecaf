@@ -5,7 +5,6 @@
 package ir.low;
 
 import codegen.VisitorIR;
-import semantic.symbol.Environment;
 import semantic.symbol.MethodDescriptor;
 
 /**
@@ -20,12 +19,15 @@ public class IRLActivation extends IRL{
     public IRLTerStm head;
     public MethodDescriptor mdes;
     
+    public String code;
+    
     
     public IRLActivation(String name,MethodDescriptor mdes){
         this.mdes = mdes;
         this.localSize = 0;
         this.name = new IRLLabel("_" + name);
         this.head = new IRLTerStm();
+        this.code = "";
     }
     
     public Object accept(VisitorIR v,Object o) throws Exception{

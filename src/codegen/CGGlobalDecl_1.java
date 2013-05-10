@@ -49,14 +49,14 @@ public class CGGlobalDecl_1 implements VisitorIR{
         printInitial();
         int amount = ir.getFieldCount();
         for(int i=0;i<amount;i++){
-            buf.write("\t .lcomm ");
+            buf.write("\t .comm ");
             FieldDescriptor f = ir.getField(i);
             buf.write(f.name + " , ");
             if(f.getClass() == ArrayDescriptor.class){
-                buf.write( '$' + String.valueOf(((ArrayDescriptor)f).size*4) );
+                buf.write(String.valueOf(((ArrayDescriptor)f).size*4) );
             }
             else{
-                buf.write("$4");
+                buf.write("4");
             }
             buf.newLine();
         }

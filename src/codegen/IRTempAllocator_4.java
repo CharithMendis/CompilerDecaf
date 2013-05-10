@@ -69,7 +69,7 @@ public class IRTempAllocator_4 implements VisitorIR{
             FieldDescriptor des = ir.getField(i);
         }
         for(int i=0;i<ir.getActivationCount();i++){
-            tempCounter = ir.getActivation(i).localSize;
+            tempCounter = ir.getActivation(i).localSize + IRLTemp.REGCNT;
             ir.getActivation(i).accept(this, o);
         }
         return null;
@@ -148,6 +148,8 @@ public class IRTempAllocator_4 implements VisitorIR{
 
     @Override
     public Object visit(CALL call, Object o) throws Exception {
+        
+        
         call.name.accept(this, o);
         for(int i=0;i<call.arguments.size();i++){
             call.getArgument(i).accept(this, o);
@@ -158,6 +160,12 @@ public class IRTempAllocator_4 implements VisitorIR{
 
     @Override
     public Object visit(IRLCallE calle, Object o) throws Exception {
+        
+        //temporary
+        calle.location = new IRLTemp();
+        calle.location.accept(this, o);
+        
+        
         calle.call.accept(this, o);
         visitEx(calle);
         return null;
@@ -171,6 +179,12 @@ public class IRTempAllocator_4 implements VisitorIR{
 
     @Override
     public Object visit(IRLArEx ar, Object o) throws Exception {
+        
+        //temporary
+        ar.location = new IRLTemp();
+        ar.location.accept(this, o);
+        
+        
         ar.lhs.accept(this, o);
         ar.rhs.accept(this, o);
         //cannot have true or false statements
@@ -179,6 +193,14 @@ public class IRTempAllocator_4 implements VisitorIR{
 
     @Override
     public Object visit(IRLConEx con, Object o) throws Exception {
+        
+        if(con.isStored){
+            //temporary
+            con.location = new IRLTemp();
+            con.location.accept(this, o);
+        
+        }
+        
         con.lhs.accept(this, o);
         con.rhs.accept(this, o);
         visitEx(con);
@@ -187,6 +209,14 @@ public class IRTempAllocator_4 implements VisitorIR{
 
     @Override
     public Object visit(IRLRelEx rel, Object o) throws Exception {
+        
+        if(rel.isStored){
+            //temporary
+            rel.location = new IRLTemp();
+            rel.location.accept(this, o);
+        
+        }
+        
         rel.lhs.accept(this, o);
         visitEx(rel);
         return null;
@@ -199,6 +229,7 @@ public class IRTempAllocator_4 implements VisitorIR{
 
     @Override
     public Object visit(IRLTemp temp, Object o) throws Exception {
+        temp.loc = ++tempCounter;
         return null;
     }
 

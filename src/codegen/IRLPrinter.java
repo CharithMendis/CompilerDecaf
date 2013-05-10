@@ -57,6 +57,12 @@ public class IRLPrinter implements VisitorIR{
         }
         return null;  
     }
+    
+    void tempPrinter(IRLEx ex) throws Exception{
+        if(ex.location != null){
+            ex.location.accept(this, null);
+        }
+    }
     //end of common functions
     
     @Override
@@ -152,9 +158,12 @@ public class IRLPrinter implements VisitorIR{
         
         return null;
     }
+    
+    //expressions
 
     @Override
     public Object visit(CALL call, Object o) throws Exception {
+        tempPrinter(call);
         call.name.accept(this, o);
         for(int i=0;i<call.arguments.size();i++){
             call.getArgument(i).accept(this, o);
@@ -165,6 +174,7 @@ public class IRLPrinter implements VisitorIR{
 
     @Override
     public Object visit(IRLCallE calle, Object o) throws Exception {
+        tempPrinter(calle);
         System.out.println("CALLE: ");
         calle.call.accept(this, o);
         visitEx(calle);
@@ -173,6 +183,7 @@ public class IRLPrinter implements VisitorIR{
 
     @Override
     public Object visit(CONST c, Object o) throws Exception {
+        tempPrinter(c);
         System.out.println("CONST: " + c.val);
         visitEx(c);
         return null;
@@ -180,6 +191,7 @@ public class IRLPrinter implements VisitorIR{
 
     @Override
     public Object visit(IRLArEx ar, Object o) throws Exception {
+        tempPrinter(ar);
         System.out.println("Arithmetic: ");
         ar.lhs.accept(this, o);
         ar.rhs.accept(this, o);
@@ -189,6 +201,7 @@ public class IRLPrinter implements VisitorIR{
 
     @Override
     public Object visit(IRLConEx con, Object o) throws Exception {
+        tempPrinter(con);
         System.out.println("Conditional: ");
         con.lhs.accept(this, o);
         con.rhs.accept(this, o);
@@ -198,6 +211,8 @@ public class IRLPrinter implements VisitorIR{
 
     @Override
     public Object visit(IRLRelEx rel, Object o) throws Exception {
+        
+        tempPrinter(rel);
         System.out.println("Relational: ");
         rel.lhs.accept(this, o);
         visitEx(rel);
@@ -206,6 +221,7 @@ public class IRLPrinter implements VisitorIR{
 
     @Override
     public Object visit(IRLLabel label, Object o) throws Exception {
+        tempPrinter(label);
         System.out.println("label: " + label.name);
         return null;
     }
@@ -218,6 +234,7 @@ public class IRLPrinter implements VisitorIR{
 
     @Override
     public Object visit(NEG neg, Object o) throws Exception {
+        tempPrinter(neg);
         System.out.println("NEG: ");
         neg.ex.accept(this, o);
         visitEx(neg);
@@ -235,16 +252,14 @@ public class IRLPrinter implements VisitorIR{
     public Object visit(IRLMemLoc loc, Object o) throws Exception {
         
         //arrays have the expr
+        tempPrinter(loc);
         System.out.println("MEMLOC: " + loc.fdes.name);
         if(loc.fdes.getClass() == ArrayDescriptor.class){
             System.out.println("global");
             loc.expr.accept(this, o);
         }
         else{
-            if(loc.fdes.loc != null) {
-                loc.fdes.loc.accept(this, o);
-            }
-            else{
+            if(loc.fdes.loc == null){ 
                 System.out.println("global");
             }
         }
