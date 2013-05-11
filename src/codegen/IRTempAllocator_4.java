@@ -160,14 +160,14 @@ public class IRTempAllocator_4 implements VisitorIR{
 
     @Override
     public Object visit(IRLCallE calle, Object o) throws Exception {
+
+        calle.call.accept(this, o);
+        visitEx(calle);
         
         //temporary
         calle.location = new IRLTemp();
         calle.location.accept(this, o);
         
-        
-        calle.call.accept(this, o);
-        visitEx(calle);
         return null;
     }
 
@@ -181,18 +181,22 @@ public class IRTempAllocator_4 implements VisitorIR{
     public Object visit(IRLArEx ar, Object o) throws Exception {
         
         //temporary
-        ar.location = new IRLTemp();
-        ar.location.accept(this, o);
-        
-        
         ar.lhs.accept(this, o);
         ar.rhs.accept(this, o);
+        
+        ar.location = new IRLTemp();
+        ar.location.accept(this, o);
         //cannot have true or false statements
         return null;
     }
 
     @Override
     public Object visit(IRLConEx con, Object o) throws Exception {
+            
+        con.lhs.accept(this, o);
+        con.rhs.accept(this, o);
+
+        visitEx(con);
         
         if(con.isStored){
             //temporary
@@ -201,14 +205,16 @@ public class IRTempAllocator_4 implements VisitorIR{
         
         }
         
-        con.lhs.accept(this, o);
-        con.rhs.accept(this, o);
-        visitEx(con);
+        
         return null;
     }
 
     @Override
     public Object visit(IRLRelEx rel, Object o) throws Exception {
+        
+        rel.lhs.accept(this, o);
+
+        visitEx(rel);
         
         if(rel.isStored){
             //temporary
@@ -217,8 +223,6 @@ public class IRTempAllocator_4 implements VisitorIR{
         
         }
         
-        rel.lhs.accept(this, o);
-        visitEx(rel);
         return null;
     }
 
