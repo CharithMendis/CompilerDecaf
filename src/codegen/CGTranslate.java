@@ -3,11 +3,6 @@
  * and open the template in the editor.
  */
 package codegen;
-
-import ir.low.CONST;
-import ir.low.IRLEx;
-import ir.low.IRLTemp;
-
 /**
  *
  * @author Charith
@@ -28,6 +23,48 @@ public class CGTranslate {
             default:
                 return "idivl";
         }
+    }
+    
+    String getJumpCommands(String op){
+        switch(op){
+            case "==":
+                return "je";
+            case "!=":
+                return "jne";
+            case "<":
+                return "jl";
+            case "<=":
+                return "jle";
+            case ">":
+                return "jg";
+            case ">=":
+                return "jge";
+            case "!":
+                return "jz";
+            default:
+                return "jmp";
+        }
+    }
+    
+    String getOppositeJumpCommands(String op){
+            switch(op){
+                case "==":
+                    return "jne";
+                case "!=":
+                    return "je";
+                case "<":
+                    return "jge";
+                case "<=":
+                    return "jg";
+                case ">":
+                    return "jle";
+                case ">=":
+                    return "jl";
+                case "!":
+                    return "jnz";
+                default:
+                    return "jmp";
+            }
     }
     
     
@@ -53,6 +90,15 @@ public class CGTranslate {
     
     public String returnCode(){
         return "\tleave\n\tret\n";
+    }
+    
+    public String jumpCode(String jump,String where,boolean opposite){
+        if(!opposite){
+            return "\t" + getJumpCommands(jump) + " " + where + "\n";
+        }
+        else{
+            return "\t" + getOppositeJumpCommands(jump) + " " + where + "\n";
+        }
     }
     
 }
