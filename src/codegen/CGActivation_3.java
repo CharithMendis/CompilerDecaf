@@ -329,8 +329,8 @@ public class CGActivation_3 implements VisitorIR{
         String ret = "";
         if(loc.fdes.getClass() == ArrayDescriptor.class){
            String where = (String)loc.expr.accept(this, o);
-           append(trans.movCode(where,EBX));
-           ret = "(" + loc.fdes.name + "," + where + ",4)"; 
+           append(trans.movCode(where,ECX));    //arrays are stored in ecx
+           ret = loc.fdes.name + "( , " + ECX + ", 4)"; 
         }
         else{
             if(loc.fdes.loc == null){   //global variable
