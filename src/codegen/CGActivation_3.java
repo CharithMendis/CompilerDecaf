@@ -174,7 +174,13 @@ public class CGActivation_3 implements VisitorIR{
 
     @Override
     public Object visit(JUMP jump, Object o) throws Exception {
-        jump.where.accept(this, o);
+        
+        if(jump.own != null){
+            jump.own.accept(this, o);
+        }
+        
+        //jump.where.accept(this, o);
+        append(trans.jumpCode("jmp", jump.where.name, false));
         visitNext(jump, o);
         return null;
     }
