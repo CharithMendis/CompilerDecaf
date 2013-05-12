@@ -175,7 +175,7 @@ public class IRLGenerator implements VisitorWithReturn{
         IRLLabel falseLabel = new IRLLabel();
         IRLLabel trueLabel = new IRLLabel();
         
-        IRLConEx ircon = new IRLConEx("<=",(IRLEx)f.var.acceptWithReturn(this), (IRLEx)f.endExpr.acceptWithReturn(this)); 
+        IRLConEx ircon = new IRLConEx("<",(IRLEx)f.var.acceptWithReturn(this), (IRLEx)f.endExpr.acceptWithReturn(this)); 
         
         ircon.falseEx = falseLabel;
         ircon.trueEx = trueLabel;
