@@ -101,7 +101,13 @@ public class IRLabelAllocator_3 implements VisitorIR{
         
         cjump.ex.accept(this, o);
         
+        if(cjump.t != null){          //false or true labels may be there
+            cjump.t.accept(this, o);
+        }
+        
         cjump.nextT.accept(this, o);   //this is a trm stm - may have other statements
+        
+        cjump.jumpAfterFalse.accept(this, o);
         
         if(cjump.f != null){          //false or true labels may be there
             cjump.f.accept(this, o);
@@ -185,13 +191,25 @@ public class IRLabelAllocator_3 implements VisitorIR{
     public Object visit(IRLConEx con, Object o) throws Exception {
         con.lhs.accept(this, o);
         con.rhs.accept(this, o);
+        if(con.isStored){
+            con.trueLabel.accept(this, o);
+            con.falseLabel.accept(this, o);
+            con.jumpAfterFalse.accept(this, o);
+        }
         visitEx(con);
         return null;
     }
 
     @Override
     public Object visit(IRLRelEx rel, Object o) throws Exception {
+        
         rel.lhs.accept(this, o);
+        rel.falseLabel.accept(this, o);
+        rel.trueLabel.accept(this, o);
+        
+        if(rel.isStored){
+            rel.jumpAfterFalse.accept(this, o);
+        }
         visitEx(rel);
         return null;
     }

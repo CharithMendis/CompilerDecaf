@@ -33,6 +33,7 @@ import ir.low.CONST;
 import ir.low.IRLActivation;
 import ir.low.IRLArEx;
 import ir.low.IRLBinaryEx;
+import ir.low.IRLBoolEx;
 import ir.low.IRLCallE;
 import ir.low.IRLCallS;
 import ir.low.IRLConEx;
@@ -44,6 +45,7 @@ import ir.low.IRLRelEx;
 import ir.low.IRLReturn;
 import ir.low.IRLStm;
 import ir.low.IRLTemp;
+import ir.low.IRLTerStm;
 import ir.low.JUMP;
 import ir.low.MOV;
 import ir.low.NEG;
@@ -133,17 +135,14 @@ public class IRLGenerator implements VisitorWithReturn{
         IRLEx rhs = (IRLEx)assign.expr.acceptWithReturn(this);
         
         //this is to assert the values that should be stored for this assignment
-        if(rhs.getClass()==IRLConEx.class){
-            ((IRLConEx)rhs).isStored = true;
-        }
-        else if(rhs.getClass()==IRLRelEx.class){
-            ((IRLRelEx)rhs).isStored = true;
+        if(rhs instanceof IRLBoolEx){
+            ((IRLBoolEx)rhs).store();
         }
         
         if(assign.operator != ASAssignment.ASSIGN){
-            lhs = new IRLArEx(assign.stringop.substring(0,1),
-                    rhs,
-                    (IRLEx)assign.expr.acceptWithReturn(this));
+            rhs = new IRLArEx(assign.stringop.substring(0,1),
+                    lhs,
+                    rhs);
         }
         
         IRLStm s = new MOV(rhs,lhs);
@@ -174,19 +173,21 @@ public class IRLGenerator implements VisitorWithReturn{
         
         //cjump
         IRLLabel falseLabel = new IRLLabel();
+        IRLLabel trueLabel = new IRLLabel();
         
         IRLConEx ircon = new IRLConEx("<=",(IRLEx)f.var.acceptWithReturn(this), (IRLEx)f.endExpr.acceptWithReturn(this)); 
+        
         ircon.falseEx = falseLabel;
-        ircon.trueEx = null;
+        ircon.trueEx = trueLabel;
         
         
-        CJUMP cjump = new CJUMP(ircon, falseLabel);
+        CJUMP cjump = new CJUMP(ircon , trueLabel, falseLabel);
         cjump.own = new IRLLabel();
         
         
-        //incrementing - can be optimized
-        MOV inc = new MOV((IRLEx)f.var.acceptWithReturn(this),
-                new IRLArEx("+",(IRLEx)f.var.acceptWithReturn(this), new CONST(1)));
+        //incrementing - can be optimized  mov from to
+        MOV inc = new MOV(new IRLArEx("+",(IRLEx)f.var.acceptWithReturn(this), new CONST(1)),
+                (IRLEx)f.var.acceptWithReturn(this));
         inc.own = new IRLLabel();
         
         breakJump.push(new JUMP(falseLabel));
@@ -201,6 +202,7 @@ public class IRLGenerator implements VisitorWithReturn{
         
         //jump back to the cjump statement
         JUMP jump = new JUMP(cjump.own);
+        jump.havePara = true;
         
         makeCurStm(jump);
         
@@ -221,10 +223,10 @@ public class IRLGenerator implements VisitorWithReturn{
         
         IRLEx ifex = (IRLEx)f.condition.acceptWithReturn(this);
  
-        CJUMP cjump = new CJUMP(ifex, new IRLLabel());
+        CJUMP cjump = new CJUMP(ifex, new IRLLabel(),new IRLLabel());
 
         ifex.falseEx = cjump.f;
-        ifex.trueEx = null;
+        ifex.trueEx = cjump.t;
         
         makeCurStm(cjump);
         
@@ -249,11 +251,8 @@ public class IRLGenerator implements VisitorWithReturn{
         if(ret.returnExpr!= null){
             
             IRLEx irlex = (IRLEx)ret.returnExpr.acceptWithReturn(this);
-            if(irlex.getClass()==IRLConEx.class){
-                ((IRLConEx)irlex).isStored = true;
-            }
-            else if(irlex.getClass()==IRLRelEx.class){
-                ((IRLRelEx)irlex).isStored = true;
+            if(irlex instanceof IRLBoolEx){
+                ((IRLBoolEx)irlex).store();
             }
             
             r = new IRLReturn(irlex);
@@ -287,20 +286,36 @@ public class IRLGenerator implements VisitorWithReturn{
             IRLLabel t = new IRLLabel();
             IRLLabel f = new IRLLabel();
             
+            IRLRelEx ret = new IRLRelEx(ex.stringop, lhs, null);
+            ret.falseLabel = f;
+            ret.trueLabel = t;
+            
             if(ex.operator == ASBinaryExpr.AND){
                 lhs.falseEx = f;
                 lhs.trueEx = rhs;
                 rhs.falseEx = f;
-                rhs.trueEx = null;
+                if(rhs.getClass() == IRLRelEx.class){
+                    rhs.trueEx = t;
+                }
+                else{
+                    rhs.trueEx = null;
+                }
+
             }
             else{
                 lhs.falseEx = rhs;
                 lhs.trueEx = t;
-                rhs.falseEx = null;
+                if(rhs.getClass() == IRLRelEx.class){
+                    rhs.falseEx = f;
+                }
+                else{
+                    rhs.trueEx = null;
+                }
                 rhs.trueEx = t;
+
             }  
             
-            return new IRLRelEx(ex.stringop, lhs, null);
+            return ret;
         }
     }
     
@@ -311,11 +326,8 @@ public class IRLGenerator implements VisitorWithReturn{
             return new IRLArEx("-", new CONST(0), irlex);
         }
         else{
-            if(irlex.getClass()==IRLConEx.class){
-                ((IRLConEx)irlex).isStored = true;
-            }
-            else if(irlex.getClass()==IRLRelEx.class){
-                ((IRLRelEx)irlex).isStored = true;
+            if(irlex instanceof IRLBoolEx){
+                ((IRLBoolEx)irlex).store();
             }
             return new NEG(irlex);
         }

@@ -32,6 +32,10 @@ public class CONST extends IRLEx{
         val = c;
     }
     
+    public CONST(){
+        
+    }
+    
     public Object accept(VisitorIR v,Object o) throws Exception{
         return v.visit(this,o);
     }

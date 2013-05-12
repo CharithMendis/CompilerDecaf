@@ -39,7 +39,7 @@ import semantic.symbol.FieldDescriptor;
  */
 public class CGActivation_3 implements VisitorIR{
     
-    String currentString;
+    //String currentString;
     BufferedWriter buf;
     CGTranslate trans;
     
@@ -49,7 +49,7 @@ public class CGActivation_3 implements VisitorIR{
     public final String EDX = "%edx";
     public final String ESP = "%esp";
     public final String EBP = "%ebp";
-    
+
 
     public CGActivation_3(BufferedWriter buf) {
         this.buf = buf;
@@ -69,18 +69,41 @@ public class CGActivation_3 implements VisitorIR{
         }
     }
     
-    Object visitEx(IRLEx ex) throws Exception{
-        if(ex.trueEx != null){
-            ex.trueEx.accept(this, ex);
+    Object visitEx(IRLEx ex,String op,String arg1,String arg2,Object o) throws Exception{
+        
+        //comaprison with eax - load to eax arg2 and then compare then jump to label
+        //determine which is a label the trueEx or falseEx
+        int label = 2;
+        if(ex.trueEx != null && ex.trueEx.getClass() == IRLLabel.class){
+            label = 1;
         }
-        if(ex.falseEx != null){
-            ex.falseEx.accept(this, ex);
+        if(ex.falseEx != null && ex.falseEx.getClass() == IRLLabel.class){
+            label = 0;
         }
+        
+        if(label!=2){
+            append(trans.movCode(arg1, EAX));
+            append(trans.cmpCode(arg2, EAX));
+        }
+        
+        if(label == 1){
+            append(trans.jumpCode(op, ((IRLLabel)ex.trueEx).name, false));
+            if(ex.falseEx!=null && ex.falseEx.getClass() != IRLLabel.class){  //if it is a label it should be the first statement
+                ex.falseEx.accept(this, o);
+            }
+        }
+        else if(label == 0){
+            append(trans.jumpCode(op, ((IRLLabel)ex.falseEx).name, true));
+            if(ex.trueEx != null && ex.trueEx.getClass() != IRLLabel.class){   //if it is a label it should be the first statement
+                ex.trueEx.accept(this, o);
+            }
+        }
+        
         return null;  
     }
     
-    void append(String s){
-        currentString += s;
+    void append(String s)throws Exception{
+        buf.write(s);
     }
     /////////////////////////////////////////
 
@@ -104,15 +127,11 @@ public class CGActivation_3 implements VisitorIR{
     @Override
     public Object visit(IRLActivation act, Object o) throws Exception {
         
-        currentString = act.code;
         act.name.accept(this, o);
         
         append("\tenter $" + String.valueOf(act.localSize*4) + ", $0\n");
         
         //save the callee save registers - change code in the temp allocation to imclude these register counts
-         
-        buf.write(currentString);
-
         act.head.accept(this, o);
         
         //restore the callee saved registers
@@ -134,14 +153,23 @@ public class CGActivation_3 implements VisitorIR{
         
         cjump.ex.accept(this, o);
         
+
+        cjump.t.accept(this, o);
+
         
-        cjump.nextT.accept(this, o);   //this is a trm stm - may have other statements
+        cjump.nextT.accept(this, cjump.noTemp);   //pass the amount of temps to jump
         
-        if(cjump.f != null){          //false or true labels may be there
-            cjump.f.accept(this, o);
-        }
+        
+        append(trans.jumpCode("jmp", cjump.jumpAfterFalse.name, true));
+        
+
+        cjump.f.accept(this, o);
+
         
         cjump.nextF.accept(this, o);  //this is a trm stm - may have other statements
+        
+        cjump.jumpAfterFalse.accept(this, o);
+        
         visitNext(cjump, o);
         
         return null;
@@ -150,7 +178,6 @@ public class CGActivation_3 implements VisitorIR{
     @Override
     public Object visit(IRLReturn ret, Object o) throws Exception {
         
-        currentString = ret.code;
         
         if(ret.ex!=null){
            String s = (String)ret.ex.accept(this, o);
@@ -158,7 +185,6 @@ public class CGActivation_3 implements VisitorIR{
         }
         append(trans.returnCode());
         
-        buf.write(currentString);
         
         visitNext(ret, o);
         
@@ -175,12 +201,19 @@ public class CGActivation_3 implements VisitorIR{
     @Override
     public Object visit(JUMP jump, Object o) throws Exception {
         
+        if(jump.havePara){   //temp fix for loops
+            append(trans.addSubMulCode("+", "$" + String.valueOf((int)o*4), ESP));
+            
+        }
+        
         if(jump.own != null){
             jump.own.accept(this, o);
         }
         
         //jump.where.accept(this, o);
         append(trans.jumpCode("jmp", jump.where.name, false));
+        
+        
         visitNext(jump, o);
         return null;
     }
@@ -188,7 +221,6 @@ public class CGActivation_3 implements VisitorIR{
     @Override
     public Object visit(MOV mov, Object o) throws Exception {
         
-        currentString = mov.code;
         
         if(mov.own != null){
             mov.own.accept(this, o);
@@ -199,8 +231,6 @@ public class CGActivation_3 implements VisitorIR{
         append(trans.movCode(s1, EBX));
         append(trans.movCode(EBX, s2));
         
-        buf.write(currentString);
-        
         visitNext(mov, o);
         
         return null;
@@ -209,7 +239,6 @@ public class CGActivation_3 implements VisitorIR{
     @Override
     public Object visit(IRLCallS calls, Object o) throws Exception {
         
-        currentString = calls.code;
         
         calls.call.accept(this, o);
         
@@ -217,9 +246,8 @@ public class CGActivation_3 implements VisitorIR{
         
         //pop the caller saved registers
         
-        buf.write(currentString);
         
-        visitNext(calls,0);
+        visitNext(calls,o);
         return null;
     }
 
@@ -247,14 +275,14 @@ public class CGActivation_3 implements VisitorIR{
         append(trans.pushCode(EAX));
         
         //pop the caller saved registers
-        visitEx(calle);
+        visitEx(calle, "==", calle.location.getRegister(), "$1",0);
         
         return calle.location.getRegister();
     }
 
     @Override
     public Object visit(CONST c, Object o) throws Exception {
-        visitEx(c);  //need to expand this as well
+        visitEx(c, "==","$" + String.valueOf(c.val),"$1",o);
         return "$" + String.valueOf(c.val);
     }
 
@@ -262,9 +290,10 @@ public class CGActivation_3 implements VisitorIR{
     @Override
     public Object visit(IRLArEx ar, Object o) throws Exception {
         
+        //cannot have true or false statements
         String s1 = (String)ar.lhs.accept(this, o);
         String s2 = (String)ar.rhs.accept(this, o);
-        //cannot have true or false statements
+        
         if(ar.stringop.equals("+") || ar.stringop.equals("-") || ar.stringop.equals("*")){
             append(trans.movCode(s1, EBX));
             append(trans.addSubMulCode(ar.stringop, s2, EBX));
@@ -290,17 +319,71 @@ public class CGActivation_3 implements VisitorIR{
 
     @Override
     public Object visit(IRLConEx con, Object o) throws Exception {
-        con.lhs.accept(this, o);
-        con.rhs.accept(this, o);
-        visitEx(con);
-        return null;
+        
+        String lhs = (String)con.lhs.accept(this, o);
+        String rhs = (String)con.rhs.accept(this, o);
+        
+        visitEx(con, con.stringop, lhs, rhs,o);
+        
+        String ret = null;
+        if(con.isStored){
+            //true
+            con.trueLabel.accept(this, o);
+            //store the value and jump
+            append(trans.movCode("$1", con.location.getRegister()));
+            append(trans.jumpCode("jmp", con.jumpAfterFalse.name, true));
+            //false
+            con.falseLabel.accept(this, o);
+            //store the value
+            append(trans.movCode("$0", con.location.getRegister()));
+            //resume
+            con.jumpAfterFalse.accept(this, o);
+            ret = con.location.getRegister();
+        }
+        
+        return ret;
     }
 
     @Override
     public Object visit(IRLRelEx rel, Object o) throws Exception {
+        
+        //first determine if the value need to be stored
+
         rel.lhs.accept(this, o);
-        visitEx(rel);
-        return null;
+        
+        
+        String ret = null;
+        if(rel.isStored){
+            rel.trueLabel.accept(this, o);
+            append(trans.movCode("$1", rel.location.getRegister()));
+            append(trans.jumpCode("jmp", rel.jumpAfterFalse.name, true));
+            //false
+            rel.falseLabel.accept(this, o);
+            //store the value
+            append(trans.movCode("$0", rel.location.getRegister()));
+            //resume
+            rel.jumpAfterFalse.accept(this, o);
+            ret = rel.location.getRegister();
+            
+        }
+        else{
+            rel.trueLabel.accept(this, o);
+            if(rel.trueEx.getClass() != IRLLabel.class){
+                rel.trueEx.accept(this, o);
+            }
+            else{
+                append(trans.jumpCode("jmp", ((IRLLabel)rel.trueEx).name, true));
+            }
+            rel.falseLabel.accept(this, o);
+            if(rel.falseEx.getClass() != IRLLabel.class){
+                rel.falseEx.accept(this, o);
+            }
+            else{
+                append(trans.jumpCode("jmp", ((IRLLabel)rel.falseEx).name, false));
+            }
+        }
+        
+        return ret;
     }
 
     @Override
@@ -318,9 +401,16 @@ public class CGActivation_3 implements VisitorIR{
 
     @Override
     public Object visit(NEG neg, Object o) throws Exception {
-        neg.ex.accept(this, o);
-        visitEx(neg);
-        return null;
+        
+        String place = (String)neg.ex.accept(this, o);
+        
+        
+        append(trans.movCode(place, EAX));
+        append(trans.xorCode("$1", EAX));
+        append(trans.movCode(EAX, neg.location.getRegister()));
+        
+        visitEx(neg, "==", neg.location.getRegister(), "$1",o);
+        return neg.location.getRegister();
     }
 
     @Override
@@ -332,7 +422,7 @@ public class CGActivation_3 implements VisitorIR{
     @Override
     public Object visit(IRLMemLoc loc, Object o) throws Exception {
         //arrays have the expr 
-        String ret = "";
+        String ret;
         if(loc.fdes.getClass() == ArrayDescriptor.class){
            String where = (String)loc.expr.accept(this, o);
            append(trans.movCode(where,ECX));    //arrays are stored in ecx
@@ -346,7 +436,7 @@ public class CGActivation_3 implements VisitorIR{
                 ret = loc.fdes.loc.getRegister();
             }
         }
-        visitEx(loc);   //need to expand this as well
+        visitEx(loc, "==", ret, "$1",o);   //need to expand this as well
         return ret;
     }
     

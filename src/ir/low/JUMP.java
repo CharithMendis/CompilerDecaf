@@ -13,12 +13,17 @@ import codegen.VisitorIR;
 public class JUMP extends IRLStm{
     
     public IRLLabel where;
+    
+    //for for loops -> bad practise need to change
+    public boolean havePara;
 
     public JUMP(IRLLabel where) {
         this.where = where;
+        havePara = false;
     }
 
     public JUMP() {
+        havePara = false;
     }
     
     

@@ -101,4 +101,16 @@ public class CGTranslate {
         }
     }
     
+    public String cmpCode(String src, String dest){
+        return "\tcmp " + src + ", " + dest + "\n";
+    }
+    
+    public String negCode(String src){
+        return "\tnot " + src + "\n";
+    }
+    
+    public String xorCode(String src,String dest){
+        return "\txor " + src + ", " + dest + "\n";
+    }
+    
 }

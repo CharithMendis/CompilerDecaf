@@ -11,10 +11,9 @@ import codegen.VisitorIR;
  *
  * @author Charith
  */
-public class IRLConEx extends IRLBinaryEx{
+public class IRLConEx extends IRLBoolEx{
+      
     
-    public int associated;    
-    public boolean isStored;
 
     public IRLConEx(String stringop, IRLEx lhs, IRLEx rhs) {
         super(stringop, lhs, rhs);
@@ -24,4 +23,16 @@ public class IRLConEx extends IRLBinaryEx{
     public Object accept(VisitorIR v,Object o) throws Exception{
         return v.visit(this,o);
     }
+
+    @Override
+    public void store() {
+        isStored = true;
+        this.trueLabel = new IRLLabel();
+        this.falseLabel = new IRLLabel();
+        this.jumpAfterFalse = new IRLLabel();
+        this.falseEx = this.falseLabel;
+        this.trueEx = null;
+    }
+    
+    
 }

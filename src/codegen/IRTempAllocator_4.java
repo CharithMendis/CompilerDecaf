@@ -93,6 +93,8 @@ public class IRTempAllocator_4 implements VisitorIR{
     @Override
     public Object visit(CJUMP cjump, Object o) throws Exception {
         
+        int save = tempCounter;
+        
         if(cjump.own != null){       //sometimes may have own label - in future we can have all cjumps have there own label
             cjump.own.accept(this, o);
         }
@@ -107,6 +109,13 @@ public class IRTempAllocator_4 implements VisitorIR{
         }
         
         cjump.nextF.accept(this, o);  //this is a trm stm - may have other statements
+        
+        cjump.noTemp = tempCounter - save;
+        
+        //System.out.println(cjump.noTemp);
+        
+        tempCounter = save;
+        
         visitNext(cjump, o);
         
         return null;
@@ -240,7 +249,11 @@ public class IRTempAllocator_4 implements VisitorIR{
     @Override
     public Object visit(NEG neg, Object o) throws Exception {
         neg.ex.accept(this, o);
+        
         visitEx(neg);
+        neg.location = new IRLTemp();
+        neg.location.accept(this, o);
+
         return null;
     }
 
