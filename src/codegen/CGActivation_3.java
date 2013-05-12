@@ -351,35 +351,71 @@ public class CGActivation_3 implements VisitorIR{
 
         rel.lhs.accept(this, o);
         
-        
+        //change the code to a seperate function
+ 
         String ret = null;
         if(rel.isStored){
-            rel.trueLabel.accept(this, o);
-            append(trans.movCode("$1", rel.location.getRegister()));
-            append(trans.jumpCode("jmp", rel.jumpAfterFalse.name, true));
-            //false
-            rel.falseLabel.accept(this, o);
-            //store the value
-            append(trans.movCode("$0", rel.location.getRegister()));
-            //resume
-            rel.jumpAfterFalse.accept(this, o);
-            ret = rel.location.getRegister();
+            
+            if(rel.stringop.equals("&&")){
+                rel.trueLabel.accept(this, o);
+                append(trans.movCode("$1", rel.location.getRegister()));
+                append(trans.jumpCode("jmp", rel.jumpAfterFalse.name, true));
+                //false
+                rel.falseLabel.accept(this, o);
+                //store the value
+                append(trans.movCode("$0", rel.location.getRegister()));
+                //resume
+                rel.jumpAfterFalse.accept(this, o);
+                ret = rel.location.getRegister();
+            }
+            else{
+                rel.falseLabel.accept(this, o);
+                append(trans.movCode("$0", rel.location.getRegister()));
+                append(trans.jumpCode("jmp", rel.jumpAfterFalse.name, true));
+                
+                rel.trueLabel.accept(this, o);
+                append(trans.movCode("$1", rel.location.getRegister()));
+
+                //resume
+                rel.jumpAfterFalse.accept(this, o);
+                ret = rel.location.getRegister();
+            }
             
         }
         else{
-            rel.trueLabel.accept(this, o);
-            if(rel.trueEx.getClass() != IRLLabel.class){
-                rel.trueEx.accept(this, o);
+            if(rel.stringop.equals("&&")){
+                rel.trueLabel.accept(this, o);
+                if(rel.trueEx.getClass() != IRLLabel.class){
+                    rel.trueEx.accept(this, o);
+                }
+                else{
+                    append(trans.jumpCode("jmp", ((IRLLabel)rel.trueEx).name, true));
+                }
+                rel.falseLabel.accept(this, o);
+                if(rel.falseEx.getClass() != IRLLabel.class){
+                    rel.falseEx.accept(this, o);
+                }
+                else{
+                    append(trans.jumpCode("jmp", ((IRLLabel)rel.falseEx).name, false));
+                }
             }
             else{
-                append(trans.jumpCode("jmp", ((IRLLabel)rel.trueEx).name, true));
-            }
-            rel.falseLabel.accept(this, o);
-            if(rel.falseEx.getClass() != IRLLabel.class){
-                rel.falseEx.accept(this, o);
-            }
-            else{
-                append(trans.jumpCode("jmp", ((IRLLabel)rel.falseEx).name, false));
+                
+                rel.falseLabel.accept(this, o);
+                if(rel.falseEx.getClass() != IRLLabel.class){
+                    rel.falseEx.accept(this, o);
+                }
+                else{
+                    append(trans.jumpCode("jmp", ((IRLLabel)rel.falseEx).name, false));
+                }
+                rel.trueLabel.accept(this, o);
+                if(rel.trueEx.getClass() != IRLLabel.class){
+                    rel.trueEx.accept(this, o);
+                }
+                else{
+                    append(trans.jumpCode("jmp", ((IRLLabel)rel.trueEx).name, true));
+                }
+                
             }
         }
         
