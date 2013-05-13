@@ -38,14 +38,19 @@ import semantic.symbol.FieldDescriptor;
 //all temporaries in the stack
 //all expressions which have a temporary should store it
 
-public class IRTempAllocator_4 implements VisitorIR{
+public class IRTempAllocator2_5 implements VisitorIR{
     
     
-    int tempCounter;
+    
     boolean debug;
+    
+    int count;
+    
+    
 
-    public IRTempAllocator_4(boolean debug) {
+    public IRTempAllocator2_5(boolean debug) {
         this.debug = debug;
+        this.count = 0;
     }
     
     
@@ -81,9 +86,7 @@ public class IRTempAllocator_4 implements VisitorIR{
             FieldDescriptor des = ir.getField(i);
         }
         for(int i=0;i<ir.getActivationCount();i++){
-            tempCounter = ir.getActivation(i).localSize + IRLTemp.REGCNT;
             ir.getActivation(i).accept(this, o);
-            
         }
         return null;
     }
@@ -109,8 +112,6 @@ public class IRTempAllocator_4 implements VisitorIR{
     @Override
     public Object visit(CJUMP cjump, Object o) throws Exception {
         
-        int save = tempCounter;
-        
         if(cjump.own != null){       //sometimes may have own label - in future we can have all cjumps have there own label
             cjump.own.accept(this, o);
         }
@@ -124,12 +125,7 @@ public class IRTempAllocator_4 implements VisitorIR{
             cjump.f.accept(this, o);
         }
         
-        cjump.nextF.accept(this, o);  //this is a trm stm - may have other statements
-        
-        if(cjump.isLoop){
-            cjump.noTemp = tempCounter - save;
-            tempCounter = save;
-        }
+        cjump.nextF.accept(this, o);  //this is a trm stm - may have other statements   
         
         visitNext(cjump, o);
         
@@ -173,11 +169,15 @@ public class IRTempAllocator_4 implements VisitorIR{
     @Override
     public Object visit(CALL call, Object o) throws Exception {
         
+        int saveCount = count;
+        count = call.totalTemp;
         
         call.name.accept(this, o);
         for(int i=call.arguments.size()-1;i>=0;i--){
             call.getArgument(i).accept(this, o);
         }
+
+        count = saveCount;
         return null;
        
     }
@@ -189,7 +189,6 @@ public class IRTempAllocator_4 implements VisitorIR{
         visitEx(calle);
         
         //temporary
-        calle.location = new IRLTemp();
         calle.location.accept(this, o);
         
         if(debug){
@@ -208,11 +207,11 @@ public class IRTempAllocator_4 implements VisitorIR{
     @Override
     public Object visit(IRLArEx ar, Object o) throws Exception {
         
-        //temporary
+        
         ar.lhs.accept(this, o);
         ar.rhs.accept(this, o);
         
-        ar.location = new IRLTemp();
+        //temporary
         ar.location.accept(this, o);
         
         if(debug){
@@ -232,7 +231,6 @@ public class IRTempAllocator_4 implements VisitorIR{
         
         if(con.isStored){
             //temporary
-            con.location = new IRLTemp();
             con.location.accept(this, o);
             
             if(debug){
@@ -254,7 +252,6 @@ public class IRTempAllocator_4 implements VisitorIR{
         
         if(rel.isStored){
             //temporary
-            rel.location = new IRLTemp();
             rel.location.accept(this, o);
             
             if(debug){
@@ -273,7 +270,10 @@ public class IRTempAllocator_4 implements VisitorIR{
 
     @Override
     public Object visit(IRLTemp temp, Object o) throws Exception {
-        temp.loc = ++tempCounter;
+        if(temp.loc == 2){
+            temp.espOffset = count - temp.espOffset;
+            temp.loc = 1;
+        }
         return null;
     }
 
@@ -282,7 +282,6 @@ public class IRTempAllocator_4 implements VisitorIR{
         neg.ex.accept(this, o);
         
         visitEx(neg);
-        neg.location = new IRLTemp();
         neg.location.accept(this, o);
         
         if(debug){

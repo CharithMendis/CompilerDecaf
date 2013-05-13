@@ -17,12 +17,13 @@ public class CALL extends IRLEx{
     public IRLLabel name;
     public ArrayList<IRLEx> arguments;
     
-    
+    public int totalTemp;
     
 
     public CALL(IRLLabel name) {
         this.name = name;
         arguments = new ArrayList();
+        totalTemp = 0;
     }
     
     public void addArgument(IRLEx ex){

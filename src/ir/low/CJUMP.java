@@ -21,6 +21,7 @@ public class CJUMP extends IRLStm{
     public IRLStm nextT;
     
     public int noTemp;
+    public boolean isLoop;
 
     public CJUMP(IRLEx ex,IRLLabel t, IRLLabel f) {
         this.ex = ex;
@@ -32,6 +33,7 @@ public class CJUMP extends IRLStm{
         
         own = null;
         noTemp = 0;
+        this.isLoop = false;
     }
     
     public Object accept(VisitorIR v,Object o) throws Exception{

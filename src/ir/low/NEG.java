@@ -13,7 +13,6 @@ import codegen.VisitorIR;
 public class NEG extends IRLEx{
     
     public IRLEx ex;
-    public IRLTemp loc;
 
     public NEG(IRLEx ex) {
         this.ex = ex;

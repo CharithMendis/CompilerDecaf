@@ -38,14 +38,20 @@ import semantic.symbol.FieldDescriptor;
 //all temporaries in the stack
 //all expressions which have a temporary should store it
 
-public class IRTempAllocator_4 implements VisitorIR{
+public class IRTempAllocator2_4 implements VisitorIR{
     
+    
+    
+    boolean debug;
     
     int tempCounter;
-    boolean debug;
+    boolean callStm;
 
-    public IRTempAllocator_4(boolean debug) {
+    public IRTempAllocator2_4(boolean debug) {
         this.debug = debug;
+        
+        this.tempCounter = 0;
+        this.callStm = false;
     }
     
     
@@ -81,9 +87,7 @@ public class IRTempAllocator_4 implements VisitorIR{
             FieldDescriptor des = ir.getField(i);
         }
         for(int i=0;i<ir.getActivationCount();i++){
-            tempCounter = ir.getActivation(i).localSize + IRLTemp.REGCNT;
             ir.getActivation(i).accept(this, o);
-            
         }
         return null;
     }
@@ -173,11 +177,21 @@ public class IRTempAllocator_4 implements VisitorIR{
     @Override
     public Object visit(CALL call, Object o) throws Exception {
         
+        int saveCounter = tempCounter;
+        tempCounter = 0;
+        boolean saveCallStm = callStm;
+        
+        callStm = true;
         
         call.name.accept(this, o);
         for(int i=call.arguments.size()-1;i>=0;i--){
             call.getArgument(i).accept(this, o);
         }
+        
+        callStm = saveCallStm;
+        call.totalTemp = tempCounter - saveCounter;
+        tempCounter = saveCounter;
+        
         return null;
        
     }
@@ -273,7 +287,13 @@ public class IRTempAllocator_4 implements VisitorIR{
 
     @Override
     public Object visit(IRLTemp temp, Object o) throws Exception {
-        temp.loc = ++tempCounter;
+        if(callStm){
+            temp.loc = 2;
+            temp.espOffset = (++tempCounter);
+        }
+        else{
+            temp.loc = 1;
+        }
         return null;
     }
 

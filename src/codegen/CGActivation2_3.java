@@ -38,7 +38,7 @@ import semantic.symbol.FieldDescriptor;
  *
  * @author Charith
  */
-public class CGActivation_3 implements VisitorIR{
+public class CGActivation2_3 implements VisitorIR{
     
     //String currentString;
     BufferedWriter buf;
@@ -52,7 +52,7 @@ public class CGActivation_3 implements VisitorIR{
     public final String EBP = "%ebp";
 
 
-    public CGActivation_3(BufferedWriter buf) {
+    public CGActivation2_3(BufferedWriter buf) {
         this.buf = buf;
         trans = new CGTranslate();
         
@@ -257,9 +257,18 @@ public class CGActivation_3 implements VisitorIR{
         
         //first store the caller saved registers
         ArrayList<String> arg = new ArrayList();
+        
+        int keep = 0;
+        
         for(int i=call.arguments.size()-1;i>=0;i--){  //arguments go the other way around
            String s  = (String)call.getArgument(i).accept(this, o);
+           
+           if(s.equals("(%esp)")){
+               int t = call.getArgument(i).location.espOffset + keep;
+               s = String.valueOf(t*4) + "(%esp)";
+           }
            arg.add(s);
+           keep++;
         }
         
         for(int i=0;i<arg.size();i++){
@@ -267,6 +276,8 @@ public class CGActivation_3 implements VisitorIR{
         }
         
         append(trans.callCode(call.name.name));  //call the function
+        append(trans.addSubMulCode("+", "$" + String.valueOf(call.totalTemp*4), ESP));
+        //System.out.println(call.name.name + String.valueOf(call.totalTemp));
         return null;
        
     }

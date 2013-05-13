@@ -51,6 +51,27 @@ public class IRLTemp {
         }
     }
     
+    public int espOffset = 0;
+    public int totalTemp = 0;
+    
+    public String getRegister2(){
+        switch(loc){
+            case 1:
+                return "(%esp)";
+            case 2:
+                return String.valueOf(espOffset*4) + "(%esp)";
+            default:
+                int actual;
+                if(loc <= 0){
+                    actual = -loc;
+                }
+                else{
+                    actual = -(loc - REGCNT);
+                }
+                return String.valueOf(actual*4) + "(%ebp)";
+        }
+    }
+    
     
     
 }

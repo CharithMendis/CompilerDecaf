@@ -5,7 +5,6 @@
 package codegen;
 
 
-import ast.ASBinaryExpr;
 import ast.ASType;
 import ir.low.CALL;
 import ir.low.CJUMP;
@@ -30,15 +29,19 @@ import ir.low.NEG;
 import ir.low.STRING;
 import java.io.BufferedWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import semantic.symbol.ArrayDescriptor;
+import semantic.symbol.Descriptor;
+import semantic.symbol.Environment;
 import semantic.symbol.FieldDescriptor;
+import semantic.symbol.VariableDescriptor;
 
 
 /**
  *
  * @author Charith
  */
-public class CGActivation_3 implements VisitorIR{
+public class CGActivation3_3 implements VisitorIR{
     
     //String currentString;
     BufferedWriter buf;
@@ -52,7 +55,7 @@ public class CGActivation_3 implements VisitorIR{
     public final String EBP = "%ebp";
 
 
-    public CGActivation_3(BufferedWriter buf) {
+    public CGActivation3_3(BufferedWriter buf) {
         this.buf = buf;
         trans = new CGTranslate();
         
@@ -106,6 +109,26 @@ public class CGActivation_3 implements VisitorIR{
     void append(String s)throws Exception{
         buf.write(s);
     }
+    
+    void initializeVariables(Environment env)throws Exception{
+        traverse(env);
+    }
+    
+    void traverse(Environment env) throws Exception{
+        HashMap<String,Descriptor> tab = env.symbolTable;
+        Object[] values = tab.keySet().toArray();
+        for(int i=0;i<values.length;i++){
+            VariableDescriptor var = (VariableDescriptor)tab.get((String)values[i]);
+            if(var.kind != VariableDescriptor.PARA){
+                append(trans.movCode("$0", var.loc.getRegister()));
+            }
+        }
+        
+        for(int i=0;i<env.next.size();i++){
+            traverse(env.next.get(i));
+        }
+    }
+    
     /////////////////////////////////////////
 
     @Override
@@ -131,6 +154,9 @@ public class CGActivation_3 implements VisitorIR{
         act.name.accept(this, o);
         
         append("\tenter $" + String.valueOf(act.localSize*4) + ", $0\n");
+        
+        //variable initialization
+        initializeVariables(act.mdes.env);
         
         //save the callee save registers - change code in the temp allocation to imclude these register counts
         act.head.accept(this, o);
@@ -158,7 +184,7 @@ public class CGActivation_3 implements VisitorIR{
         cjump.t.accept(this, o);
 
         
-        cjump.nextT.accept(this, cjump.noTemp);   //pass the amount of temps to jump
+        cjump.nextT.accept(this,o);   //pass the amount of temps to jump
         
         
         append(trans.jumpCode("jmp", cjump.jumpAfterFalse.name, true));
@@ -202,10 +228,10 @@ public class CGActivation_3 implements VisitorIR{
     @Override
     public Object visit(JUMP jump, Object o) throws Exception {
         
-        if(jump.havePara){   //temp fix for loops
+        /*if(jump.havePara){   //temp fix for loops
             append(trans.addSubMulCode("+", "$" + String.valueOf((int)o*4), ESP));
             
-        }
+        }*/
         
         if(jump.own != null){
             jump.own.accept(this, o);
@@ -227,9 +253,8 @@ public class CGActivation_3 implements VisitorIR{
             mov.own.accept(this, o);
         }
         String s1 = (String)mov.from.accept(this, o);
-        String s2 = (String)mov.to.accept(this, o);
-        
         append(trans.movCode(s1, EBX));
+        String s2 = (String)mov.to.accept(this, o);
         append(trans.movCode(EBX, s2));
         
         visitNext(mov, o);
@@ -277,7 +302,8 @@ public class CGActivation_3 implements VisitorIR{
         calle.call.accept(this, o);
         
         append(trans.addSubMulCode("+","$" + String.valueOf(calle.call.arguments.size()*4), ESP));   //remove parameters
-        append(trans.pushCode(EAX));
+        //append(trans.pushCode(EAX));
+        append(trans.movCode(EAX, calle.location.getRegister()));
         
         //pop the caller saved registers
         visitEx(calle, "==", calle.location.getRegister(), "$1",0);
@@ -302,21 +328,24 @@ public class CGActivation_3 implements VisitorIR{
         if(ar.stringop.equals("+") || ar.stringop.equals("-") || ar.stringop.equals("*")){
             append(trans.movCode(s1, EBX));
             append(trans.addSubMulCode(ar.stringop, s2, EBX));
-            append(trans.pushCode(EBX));
+            //append(trans.pushCode(EBX));
+            append(trans.movCode(EBX, ar.location.getRegister()));
         }
         else if(ar.stringop.equals("/")){
             append(trans.movCode(s1, EAX));
             append("\tcdq\n");                   //extend to quad word
             append(trans.movCode(s2, EBX));
             append(trans.divModCode(ar.stringop, EBX));
-            append(trans.pushCode(EAX));
+            //append(trans.pushCode(EAX));
+            append(trans.movCode(EAX, ar.location.getRegister()));
         }
         else{
             append(trans.movCode(s1, EAX));
             append("\tcdq\n");
             append(trans.movCode(s2, EBX));
             append(trans.divModCode(ar.stringop, EBX));
-            append(trans.pushCode(EDX));
+            //append(trans.pushCode(EDX));
+            append(trans.movCode(EDX, ar.location.getRegister()));
         }
         
         return ar.location.getRegister();

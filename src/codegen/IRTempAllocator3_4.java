@@ -38,13 +38,13 @@ import semantic.symbol.FieldDescriptor;
 //all temporaries in the stack
 //all expressions which have a temporary should store it
 
-public class IRTempAllocator_4 implements VisitorIR{
+public class IRTempAllocator3_4 implements VisitorIR{
     
     
     int tempCounter;
     boolean debug;
 
-    public IRTempAllocator_4(boolean debug) {
+    public IRTempAllocator3_4(boolean debug) {
         this.debug = debug;
     }
     
@@ -96,6 +96,8 @@ public class IRTempAllocator_4 implements VisitorIR{
         act.name.accept(this, o);
         act.head.accept(this, o);
         
+        act.localSize = tempCounter - IRLTemp.REGCNT;
+        
         return null;
     }
 
@@ -108,9 +110,7 @@ public class IRTempAllocator_4 implements VisitorIR{
 
     @Override
     public Object visit(CJUMP cjump, Object o) throws Exception {
-        
-        int save = tempCounter;
-        
+                
         if(cjump.own != null){       //sometimes may have own label - in future we can have all cjumps have there own label
             cjump.own.accept(this, o);
         }
@@ -125,11 +125,6 @@ public class IRTempAllocator_4 implements VisitorIR{
         }
         
         cjump.nextF.accept(this, o);  //this is a trm stm - may have other statements
-        
-        if(cjump.isLoop){
-            cjump.noTemp = tempCounter - save;
-            tempCounter = save;
-        }
         
         visitNext(cjump, o);
         

@@ -123,6 +123,11 @@ class Main {
                             if(v.noOfErrors!=0){
                                 throw new SemException();
                             }
+                            System.out.println("\n***************AST*******************");
+                            p.accept(new ASTPrinter(),0);
+                            System.out.println("\n***************SYMBOL TABLE*******************");
+                            SymbolTablePrinter print = new SymbolTablePrinter(v.top);
+                            print.print();
                             
                             IRLGenerator irg = new IRLGenerator(v.top);
                             p.acceptWithReturn(irg);

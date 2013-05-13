@@ -183,6 +183,7 @@ public class IRLGenerator implements VisitorWithReturn{
         
         CJUMP cjump = new CJUMP(ircon , trueLabel, falseLabel);
         cjump.own = new IRLLabel();
+        cjump.isLoop = true;
         
         
         //incrementing - can be optimized  mov from to
