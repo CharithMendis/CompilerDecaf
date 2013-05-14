@@ -13,6 +13,7 @@ import semantic.symbol.MethodDescriptor;
  */
 public class IRLActivation extends IRL{
     
+    public STRING methodName;
     
     public IRLLabel name;
     public int localSize;
@@ -28,6 +29,7 @@ public class IRLActivation extends IRL{
         this.name = new IRLLabel("_" + name);
         this.head = new IRLTerStm();
         this.code = "";
+        this.methodName = new STRING(null,"\"\\\"" + name + "\\\"\"");
     }
     
     public Object accept(VisitorIR v,Object o) throws Exception{

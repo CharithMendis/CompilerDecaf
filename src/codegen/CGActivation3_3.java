@@ -53,6 +53,9 @@ public class CGActivation3_3 implements VisitorIR{
     public final String EDX = "%edx";
     public final String ESP = "%esp";
     public final String EBP = "%ebp";
+    
+    
+    public IRLActivation currentAct;
 
 
     public CGActivation3_3(BufferedWriter buf) {
@@ -151,6 +154,8 @@ public class CGActivation3_3 implements VisitorIR{
     @Override
     public Object visit(IRLActivation act, Object o) throws Exception {
         
+        currentAct = act;
+        
         act.name.accept(this, o);
         
         append("\tenter $" + String.valueOf(act.localSize*4) + ", $0\n");
@@ -163,8 +168,15 @@ public class CGActivation3_3 implements VisitorIR{
         
         //restore the callee saved registers
         if(act.mdes.returnValue.type == ASType.VOID){
-            buf.write("\tleave\n\tret\n\n");   //to be safe that a return is there
+            buf.write("\tleave\n\tret\n");   //to be safe that a return is there
         }
+        
+        //for methods which return a value cannot reach here
+        append(new CGExceptions().getNoReturnTemplate(act.name.name,act.methodName.label));
+        
+        append("\n\n");
+        
+        currentAct = null;
         
         return null;
     }
@@ -495,6 +507,9 @@ public class CGActivation3_3 implements VisitorIR{
         String ret;
         if(loc.fdes.getClass() == ArrayDescriptor.class){
            String where = (String)loc.expr.accept(this, o);
+           //need to check bounds - inject code here
+           append(trans.movCode(where, EAX));   //move to compare can change where to EAX
+           append(new CGExceptions().getOutofBoundsTemplate(((ArrayDescriptor)loc.fdes).size, EAX,currentAct.methodName.label));
            append(trans.movCode(where,ECX));    //arrays are stored in ecx
            ret = loc.fdes.name + "( , " + ECX + ", 4)"; 
         }

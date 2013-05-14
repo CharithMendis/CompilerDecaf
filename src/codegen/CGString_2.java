@@ -26,8 +26,10 @@ public class CGString_2 {
         for(int i=0;i<strings.size();i++){
             STRING now = strings.get(i);
             buf.write(now.label.name + ": .ascii ");
-            String[] split = now.value.split("\"");
-            buf.write("\"" + split[1] + "\\0\"");
+            String s = now.value;
+            s = s.substring(0, s.length()-1);
+            s = s.concat("\\0\"");
+            buf.write(s);
             buf.newLine();
         }
     }

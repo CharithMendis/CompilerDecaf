@@ -4,6 +4,7 @@
  */
 package codegen;
 
+import ast.ASType;
 import ir.low.CALL;
 import ir.low.CJUMP;
 import ir.low.CONST;
@@ -26,6 +27,7 @@ import ir.low.STRING;
 import java.io.BufferedWriter;
 import semantic.symbol.ArrayDescriptor;
 import semantic.symbol.FieldDescriptor;
+import semantic.symbol.VariableDescriptor;
 
 /**
  *
@@ -34,6 +36,7 @@ import semantic.symbol.FieldDescriptor;
 public class CGGlobalDecl_1 implements VisitorIR{
 
     BufferedWriter buf;
+    
 
     public CGGlobalDecl_1(BufferedWriter buf){
         this.buf = buf;
@@ -43,6 +46,8 @@ public class CGGlobalDecl_1 implements VisitorIR{
         buf.write(".section .data");
         buf.newLine();
     }
+    
+   
     
     @Override
     public Object visit(IRLContainer ir,Object o) throws Exception{

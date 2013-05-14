@@ -123,18 +123,14 @@ class Main {
                             if(v.noOfErrors!=0){
                                 throw new SemException();
                             }
-                            System.out.println("\n***************AST*******************");
-                            p.accept(new ASTPrinter(),0);
-                            System.out.println("\n***************SYMBOL TABLE*******************");
-                            SymbolTablePrinter print = new SymbolTablePrinter(v.top);
-                            print.print();
+                            
                             
                             IRLGenerator irg = new IRLGenerator(v.top);
                             p.acceptWithReturn(irg);
                             //get the container of the low level IR out
                             IRLContainer ircon = irg.currentContainer;
                             //generate code
-                            CodeGen gen = new CodeGen(ircon,"out.s");
+                            CodeGen gen = new CodeGen(ircon,"out.s",CLI.debug);
                             
                             //build the IR remaining parts
                             gen.buildIRL();
@@ -143,9 +139,6 @@ class Main {
                             //generate the assembly codes
                             gen.generateCode();
                             
-                            if(CLI.debug){
-                                //yet to decide
-                            }
                             System.exit(0);
                         } catch(Exception e) {
                             System.out.println(e);

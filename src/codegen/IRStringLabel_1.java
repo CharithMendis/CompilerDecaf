@@ -80,6 +80,7 @@ public class IRStringLabel_1 implements VisitorIR{
 
     @Override
     public Object visit(IRLActivation act, Object o) throws Exception {
+        act.methodName.accept(this, o);
         act.name.accept(this, o);
         act.head.accept(this, o);
         
